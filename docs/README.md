@@ -1,50 +1,64 @@
 # HarmonyOS 三方库移植
 
-本项目用于将第三方 C/C++ 库移植到 HarmonyOS。
+**定位**：AI 可执行的第三方 C/C++ 库鸿蒙化编译工作流
 
 ---
 
-## 工作流程
+## 完整工作流程（5 个阶段，11 个文档）
 
-### 阶段一：前期准备
+### Phase 1: 前期准备（3 个文档）✅
 
 | 步骤 | 文档 | 说明 |
 |------|------|------|
-| 1-1 | [环境检查](./01-env-check.md) | 检查 WSL、Git、Python、编译工具链 |
-| 1-2 | [准备任务](./02-prepare-tasks.md) | 生成任务表格，用户填写库信息 |
+| 1-1 | [00-paths.md](./00-paths.md) | 路径配置 |
+| 1-2 | [01-env-check.md](./01-env-check.md) | 环境检查 |
+| 1-3 | [02-prepare-tasks.md](./02-prepare-tasks.md) | 任务准备 |
 
-### 阶段二：代码获取与分析
+---
+
+### Phase 2: 代码获取（3 个文档）✅
 
 | 步骤 | 文档 | 说明 |
 |------|------|------|
-| 2-1 | 拉取代码 | git clone 到 libs/ 目录 |
-| 2-2 | 阅读代码 | 分析依赖，查找 HarmonyOS 适配方法 |
-
-### 阶段三：适配与编译
-
-（待续）
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | 拉取代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | 验证版本 |
 
 ---
 
-## 快速开始
+### Phase 3: 鸿蒙化适配（4 个文档）✅
 
-1. **环境检查**：AI 自动验证编译工具链是否就绪
-2. **填写表格**：用户提供需要移植的库信息
-3. **自动执行**：AI 完成剩余所有步骤
+| 步骤 | 文档 | 说明 |
+|------|------|------|
+| 3-1 | [06-analyze-code.md](./06-analyze-code.md) | 代码分析 |
+| 3-2 | [07-adaptation-plan.md](./07-adaptation-plan.md) | 生成方案 |
+| 3-3 | [08-adaptation-implement.md](./08-adaptation-implement.md) | 实施修改 |
+| 3-4 | [09-adaptation-report.md](./09-adaptation-report.md) | 生成报告 |
 
 ---
 
-## 目录结构
+### Phase 4: 构建与编译（2 个文档）⚠️
 
-```
-ho-thirdparty-porting/
-├── docs/                   # 操作指南
-│   ├── 00-paths.md        # 路径配置
-│   ├── 01-env-check.md    # 1-1 环境检查
-│   ├── 02-prepare-tasks.md # 1-2 准备任务
-│   └── README.md          # 本文档
-├── libs/                   # 存放克隆的库源码
-├── outputs/                # 编译产物 (.so)
-├── reports/                # 编译报告
-└── scripts/                # 编译脚本
-```
+| 步骤 | 文档 | 说明 |
+|------|------|------|
+| 4-1 | [10-build-system-detect.md](./10-build-system-detect.md) | 构建系统识别 |
+| 4-2 | [11-cmake-build.md](./11-cmake-build.md) | CMake 编译 |
+
+---
+
+### Phase 5: 交付与归档（0 个文档）❌
+
+待编写
+
+---
+
+## 快速索引
+
+- **Phase 1 准备** → [01-env-check.md](./01-env-check.md)
+- **Phase 2 获取** → [05-verify-code.md](./05-verify-code.md)
+- **Phase 3 适配** → [07-adaptation-plan.md](./07-adaptation-plan.md)
+- **Phase 4 编译** → [11-cmake-build.md](./11-cmake-build.md)
+
+---
+
+*最后更新：2026-03-04*
