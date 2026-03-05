@@ -265,6 +265,35 @@ If 失败:
 4. **跳过验证** - 不验证语法就报告完成
 
 ---
+## TODO 管理（重要！）
+
+**Phase 4-5 连续执行原则**：
+
+1. Phase 4-5 是**连续执行**的，中间不需要用户确认
+2. 开始 Phase 4-5 前，确保已有用户批准的适配方案
+3. Phase 4-5 完成后统一清空 TODO，然后 STOP
+
+**TODO 创建示例**：
+
+```typescript
+// 用户说"批准方案"后创建 Phase 4-5 TODO
+todowrite([
+  { id: 1, content: "Phase 4-1: 适配实施" },
+  { id: 2, content: "Phase 4-2: 生成适配报告" },
+  { id: 3, content: "Phase 5-1: 构建系统识别" },
+  { id: 4, content: "Phase 5-2: CMake 编译" },
+])
+
+// Phase 4-5 完成后清空
+todowrite([])
+
+// 🛑 STOP - 等待用户确认
+```
+
+> ⚠️ **AI 注意**：Phase 4-5 连续执行，但完成后必须 STOP 等待用户确认！
+
+---
+
 
 ## 下一步
 

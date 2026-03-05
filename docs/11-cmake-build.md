@@ -539,10 +539,36 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain-ohos-arm64.cmake
 - [ ] 依赖检查通过
 - [ ] 编译报告已生成（`reports/<库名>-build-report.md`）
 
+## TODO 管理（重要！）
+
+**当前 Phase 完成后**：
+
+1. 如果 Phase 4-5 全部完成 → 清空 TODO：`todowrite([])`
+2. 发送完成消息
+3. 🛑 **STOP - 等待用户确认**
+
+**完成消息示例**：
+
+```
+"✅ Phase 4-5 全部完成！
+
+- 适配实施：完成
+- 适配报告：已生成
+- 构建系统识别：完成（CMake）
+- CMake 编译：完成
+
+**编译产物**：`outputs/<库名>/lib<库名>.so`
+**编译报告**：`reports/<库名>-build-report.md`
+
+请确认结果后回复'**继续 Phase 6**'，我将进行交付归档。"
+```
+
+> ⚠️ **AI 注意**：
+> - 不要创建 Phase 6 的 TODO！等待用户确认再说。
+> - Phase 4-5 是连续执行的，完成后统一清空 TODO
+
 ---
 
 ## 下一步
 
 编译完成后 → **Phase 6: 交付与归档**（`docs/12-delivery-archive.md`，待完善）
-
-**TODO 管理**：清空 Phase 5 TODO，等待用户确认后创建 Phase 6 TODO
