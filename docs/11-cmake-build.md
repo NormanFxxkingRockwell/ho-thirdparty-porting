@@ -544,3 +544,5 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain-ohos-arm64.cmake
 ## 下一步
 
 编译完成后 → **Phase 6: 交付与归档**（`docs/12-delivery-archive.md`，待完善）
+
+**TODO 管理**：清空 Phase 5 TODO，等待用户确认后创建 Phase 6 TODO

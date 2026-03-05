@@ -228,3 +228,5 @@ cat reports/<库名>-analysis.md
 ## 下一步
 
 用户批准后 → **Phase 4: 适配实施与报告**（`docs/08-adaptation-implement.md`）
+
+**TODO 管理**：清空 Phase 3 TODO，创建 Phase 4-5 的 TODO

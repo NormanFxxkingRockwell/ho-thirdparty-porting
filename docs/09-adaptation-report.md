@@ -154,3 +154,5 @@
 ## 下一步
 
 适配报告完成 → **Phase 5: 构建与编译**（`docs/10-build-system-detect.md`）
+
+**TODO 管理**：Phase 4-5 完成后清空 TODO，发送消息并 STOP
