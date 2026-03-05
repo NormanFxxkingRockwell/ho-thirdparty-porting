@@ -18,6 +18,30 @@ AI 需要管理和配置以下资源：
 ## 路径变量
 
 ```bash
+# HarmonyOS 编译工具链 (Windows 路径，WSL 访问)
+export COMMAND_LINE_TOOLS_ROOT="//wsl.localhost/Ubuntu/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/command-line-tools"
+export OHOS_SDK_ROOT="//wsl.localhost/Ubuntu/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/command-line-tools/sdk/default/openharmony/native/llvm"
+export ARM64_CC="aarch64-unknown-linux-ohos-clang"
+export ARM_CC="armv7-unknown-linux-ohos-clang"
+
+# HarmonyOS 文档索引 (WSL 路径)
+export DOCS_INDEX_ROOT="//wsl.localhost/Ubuntu/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/docs_index"
+
+# 三方库编译项目 (WSL 路径)
+export PORTING_ROOT="//wsl.localhost/Ubuntu/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/ho-thirdparty-porting/"
+```
+# HarmonyOS 编译工具链 (Windows 路径)
+export COMMAND_LINE_TOOLS_ROOT="/c/Users/aoqiduan/Desktop/env/command-line-tools"
+export OHOS_SDK_ROOT="/c/Users/aoqiduan/Desktop/env/OH_SDK/ohos-sdk"
+export ARM64_CC="aarch64-unknown-linux-ohos-clang"
+export ARM_CC="armv7-unknown-linux-ohos-clang"
+
+# HarmonyOS 文档索引 (WSL 路径)
+export DOCS_INDEX_ROOT="/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/docs_index"
+
+# 三方库编译项目 (WSL 路径)
+export PORTING_ROOT="/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/ho-thirdparty-porting/"
+```
 # HarmonyOS 编译工具链
 export COMMAND_LINE_TOOLS_ROOT="/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/command-line-tools"
 export ARM64_CC="aarch64-unknown-linux-ohos-clang"

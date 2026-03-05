@@ -1,4 +1,6 @@
-# Phase 3-4: 生成简化适配报告
+# Phase 4: 适配实施与报告
+
+## Phase 4-2: 生成适配报告（Phase 4 续）
 
 **定位**：记录实施状态和遗留问题
 
@@ -151,4 +153,4 @@
 
 ## 下一步
 
-适配报告完成 → **Phase 4-1: 构建系统识别**（`docs/10-build-system-detect.md`）
+适配报告完成 → **Phase 5: 构建与编译**（`docs/10-build-system-detect.md`）

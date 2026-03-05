@@ -129,4 +129,4 @@ export DOCS_INDEX_ROOT="/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/doc
 
 ## 下一步
 
-环境检查全部通过后，即可开始三方库编译工作流。
+环境检查全部通过后，即可进入 **Phase 1-2: 任务准备**（`docs/02-prepare-tasks.md`）。

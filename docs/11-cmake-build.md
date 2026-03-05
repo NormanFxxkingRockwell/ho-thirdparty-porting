@@ -1,10 +1,12 @@
-# Phase 4-2: CMake 构建系统编译
+# Phase 5: 构建与编译
+
+## Phase 5-2: CMake 构建系统编译（Phase 5 续）
 
 **定位**：AI 使用 CMake 编译第三方库到 HarmonyOS 的完整流程
 
 **前置条件**：
-- 代码适配已完成（Phase 3）
-- 构建系统已识别为 CMake（`docs/09-build-system-detect.md`）
+- 代码适配已完成（Phase 4）
+- 构建系统已识别为 CMake（`docs/10-build-system-detect.md`）
 - 工具链文件已生成
 
 **输入**：
@@ -541,4 +543,4 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain-ohos-arm64.cmake
 
 ## 下一步
 
-编译完成后 → **Phase 4-5: 产物验证**（`docs/13-verification.md`）
+编译完成后 → **Phase 6: 交付与归档**（`docs/12-delivery-archive.md`，待完善）

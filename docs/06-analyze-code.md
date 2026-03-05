@@ -574,4 +574,4 @@ HiLog::Info(LABEL, "Message: %{public}s", data);
 
 ## 下一步
 
-代码分析完成后 → **Phase 3-2: 鸿蒙化适配**（`docs/07-adaptation.md`）
+代码分析完成后 → **Phase 3-2: 生成适配方案**（本节下文）

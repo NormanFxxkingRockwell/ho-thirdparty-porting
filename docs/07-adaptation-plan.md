@@ -1,4 +1,4 @@
-# Phase 3-2: 生成适配方案
+# Phase 3-2: 生成适配方案（Phase 3 续）
 
 **定位**：AI 根据代码分析结果，生成**详细的修改指令**
 
@@ -227,4 +227,4 @@ cat reports/<库名>-analysis.md
 
 ## 下一步
 
-用户批准后 → **Phase 3-3: 适配实施**（`docs/08-adaptation-implement.md`）
+用户批准后 → **Phase 4: 适配实施与报告**（`docs/08-adaptation-implement.md`）

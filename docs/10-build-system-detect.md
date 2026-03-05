@@ -1,4 +1,6 @@
-# Phase 4-1: 构建系统识别
+# Phase 5: 构建与编译
+
+## Phase 5-1: 构建系统识别
 
 **定位**：AI 在代码适配完成后，识别并使用正确的构建系统进行编译
 
@@ -550,6 +552,6 @@ make -n | head -20
 
 根据构建系统类型，进入对应的编译文档：
 - CMake → `docs/10-cmake-build.md`
-- Autotools → `docs/11-autotools-build.md`
+- Autotools → `docs/11-cmake-build.md`
 - Makefile → `docs/12-makefile-build.md`
 - GN → `docs/13-gn-build.md`
