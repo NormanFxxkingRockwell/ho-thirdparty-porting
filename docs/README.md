@@ -144,15 +144,14 @@ todowrite([])
 
 ---
 
-### Phase 2-3: 代码获取 + 分析方案（5 个子任务）✅
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
 
 | 步骤 | 文档 | TODO 内容 |
 |------|------|----------|
 | 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
 | 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
 | 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3-1 | [06-analyze-code.md](./06-analyze-code.md) | Phase 3-1: 代码分析 |
-| 3-2 | [07-adaptation-plan.md](./07-adaptation-plan.md) | Phase 3-2: 生成适配方案 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
 
 **TODO 管理**：
 ```typescript
@@ -161,10 +160,389 @@ todowrite([
   { id: 1, content: "Phase 2-1: 读取 Excel" },
   { id: 2, content: "Phase 2-2: 克隆代码" },
   { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3-1: 代码分析" },
-  { id: 5, content: "Phase 3-2: 生成适配方案" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
 ])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
 
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
+### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
+
+| 步骤 | 文档 | TODO 内容 |
+|------|------|----------|
+| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
+| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
+| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
+| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
+
+**TODO 管理**：
+```typescript
+// 用户说"填好了"后创建
+todowrite([
+  { id: 1, content: "Phase 2-1: 读取 Excel" },
+  { id: 2, content: "Phase 2-2: 克隆代码" },
+  { id: 3, content: "Phase 2-3: 验证版本" },
+  { id: 4, content: "Phase 3: 代码分析与适配方案" },
+])
+```
 // Phase 2-3 完成后清空
 todowrite([])
 
@@ -243,7 +621,7 @@ todowrite([])
 ## 快速索引
 
 - **Phase 1 准备** → [00-paths.md](./00-paths.md) → [01-env-check.md](./01-env-check.md) → [02-prepare-tasks.md](./02-prepare-tasks.md)
-- **Phase 2-3 获取 + 分析** → [03-read-tasks.md](./03-read-tasks.md) → [04-clone-code.md](./04-clone-code.md) → [05-verify-code.md](./05-verify-code.md) → [06-analyze-code.md](./06-analyze-code.md) → [07-adaptation-plan.md](./07-adaptation-plan.md)
+- **Phase 2-3 获取 + 分析** → [03-read-tasks.md](./03-read-tasks.md) → [04-clone-code.md](./04-clone-code.md) → [05-verify-code.md](./05-verify-code.md) → [06-code-analysis.md](./06-code-analysis.md)
 - **Phase 4-5 实施 + 编译** → [08-adaptation-implement.md](./08-adaptation-implement.md) → [09-adaptation-report.md](./09-adaptation-report.md) → [10-build-system-detect.md](./10-build-system-detect.md) → [11-cmake-build.md](./11-cmake-build.md)
 - **Phase 6 交付** → [12-delivery-archive.md](./12-delivery-archive.md)
 
