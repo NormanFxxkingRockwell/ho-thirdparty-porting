@@ -1,51 +1,124 @@
 # 路径配置
 
-本文档由 AI 在环境检查时自动生成和维护。
+本文件记录当前仓库在本机上的关键路径约定。
 
----
+目标：
+- 当前仓库可迁移到其他机器
+- AI 和脚本优先通过仓库相对关系推导路径
+- 只有无法自动推导时，才要求用户显式填写
 
-## 资源清单
+## 必须理解的变量
 
-AI 需要管理和配置以下资源：
+### PORTING_ROOT
 
-| 资源 | 说明 | 默认目标路径 |
-|------|------|-------------|
-| **command-line-tools** | HarmonyOS 编译工具链 | `/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/command-line-tools/` |
-| **docs_index** | HarmonyOS 文档索引 | `/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/docs_index/` |
+当前仓库根目录。
 
----
+约定：
+- 由当前仓库位置自动推导
+- 不需要用户手填
 
-## 路径变量
+示例：
 
 ```bash
-# HarmonyOS 编译工具链 (WSL 路径)
-export COMMAND_LINE_TOOLS_ROOT="/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/command-line-tools"
-export OHOS_SDK_ROOT="/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/command-line-tools/sdk/default/openharmony/native/llvm"
-export ARM64_CC="aarch64-unknown-linux-ohos-clang"
-export ARM_CC="armv7-unknown-linux-ohos-clang"
-
-# HarmonyOS 文档索引 (WSL 路径)
-export DOCS_INDEX_ROOT="/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/docs_index"
-
-# 三方库编译项目 (WSL 路径)
-export PORTING_ROOT="/home/aoqiduan/projects/harmonyOS-mcp/harmonyOS-tool/ho-thirdparty-porting/"
+export PORTING_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ```
 
----
+### LYCIUM_ROOT
 
-## 资源下载地址
+当前仓库内的 `tpc_c_cplusplus` 目录。
 
-| 资源 | 下载地址 |
-|------|---------|
-| **command-line-tools** | https://developer.huawei.com/consumer/cn/download/ |
-| **docs_index** | https://github.com/NormanFxxkingRockwell/docs_index |
+约定：
 
----
+```bash
+export LYCIUM_ROOT="$PORTING_ROOT/tpc_c_cplusplus"
+```
 
-## 使用方法
+说明：
+- 当前仓库已通过 `.gitignore` 忽略 `tpc_c_cplusplus/`
+- 如果目录不存在，AI 可尝试自动拉取
 
-1. AI 读取本文档，提取路径变量
-2. 执行 bash 命令验证路径是否有效
-3. 如无效，在常见位置搜索资源
-4. 如未找到，询问用户处理方式
-5. 验证成功后，更新本文档中的路径
+### COMMAND_LINE_TOOLS_ROOT
+
+HarmonyOS Command Line Tools 根目录。
+
+说明：
+- 这是主变量
+- 如果 AI 无法自动找到，则应要求用户提供
+
+示例：
+
+```bash
+export COMMAND_LINE_TOOLS_ROOT="/path/to/command-line-tools"
+```
+
+### OHOS_SDK
+
+供 `lycium` 使用的兼容变量。
+
+约定：
+
+```bash
+export OHOS_SDK="$COMMAND_LINE_TOOLS_ROOT/sdk/default/openharmony"
+```
+
+### OHOS_NDK_ROOT
+
+供 fallback 原生构建使用的兼容变量。
+
+约定：
+
+```bash
+export OHOS_NDK_ROOT="$COMMAND_LINE_TOOLS_ROOT/sdk/default/openharmony/native"
+```
+
+## 推荐导出模板
+
+```bash
+export PORTING_ROOT="/absolute/path/to/ho-thirdparty-porting"
+export LYCIUM_ROOT="$PORTING_ROOT/tpc_c_cplusplus"
+export COMMAND_LINE_TOOLS_ROOT="/absolute/path/to/command-line-tools"
+export OHOS_SDK="$COMMAND_LINE_TOOLS_ROOT/sdk/default/openharmony"
+export OHOS_NDK_ROOT="$COMMAND_LINE_TOOLS_ROOT/sdk/default/openharmony/native"
+export DEFAULT_OHOS_ARCH="arm64-v8a"
+export DEFAULT_OUTPUT_KIND="shared"
+```
+
+## 自动推导优先级
+
+### 1. `PORTING_ROOT`
+
+- 当前仓库根目录
+
+### 2. `LYCIUM_ROOT`
+
+- `$PORTING_ROOT/tpc_c_cplusplus`
+
+### 3. `COMMAND_LINE_TOOLS_ROOT`
+
+优先搜索：
+- 环境变量 `COMMAND_LINE_TOOLS_ROOT`
+- `$PORTING_ROOT/../command-line-tools`
+- `$HOME/command-line-tools`
+- `/opt/command-line-tools`
+
+### 4. `OHOS_SDK`
+
+- 由 `COMMAND_LINE_TOOLS_ROOT` 推导
+- 不单独手填，除非路径布局特殊
+
+## AI 处理规则
+
+- 不要在文档、脚本、报告中写死某台机器的个人路径
+- 任何新增脚本都必须先推导 `PORTING_ROOT`
+- 当 `COMMAND_LINE_TOOLS_ROOT` 自动发现失败时，再提示用户补充
+- 当 `LYCIUM_ROOT` 缺失时，优先尝试自动拉取 `tpc_c_cplusplus`
+
+## 校验命令
+
+```bash
+test -d "$PORTING_ROOT"
+test -d "$LYCIUM_ROOT"
+test -d "$COMMAND_LINE_TOOLS_ROOT"
+test -d "$OHOS_SDK/native/llvm"
+```
+

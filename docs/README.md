@@ -1,648 +1,160 @@
-# ⚠️ 重要提示：给 AI 执行者的工作指南
+# HarmonyOS 三方库移植流程
 
-**本文档是给 AI 执行的，不是给人阅读的！**
+本目录用于指导 AI 在当前仓库中执行 HarmonyOS 三方库移植流程。
 
-## 🚨 TODO 管理原则（AI 必须严格遵守）
+仓库定位：
+- 这是流程仓库，不是业务应用代码仓库。
+- 目标是让 AI 可以按照固定流程完成三方库获取、业务代码适配、构建编译、产物交付。
+- 当前优先保证流程可执行、可复用、可迁移，业务适配准确性不是本轮重点。
 
-**这是 AI 执行工作流的最重要原则，必须严格遵守！**
+编译约束：
+- 编译只在 Linux 或 WSL 这类类 Linux 环境中进行。
+- 默认目标产物是 `.so`。
+- 默认目标架构是 `arm64-v8a`。
+- Phase 5 的编译策略是：`lycium` 优先，失败后分类，再进入原生 fallback。
 
-### ⭐ TODO 创建规则（核心原则）
+## 核心原则
 
-```
-❌ 错误做法：一次性创建所有 Phase 的 TODO
-✅ 正确做法：只创建当前 Phase 的 TODO，完成后清空，等待用户确认
+### 1. Phase 职责边界必须清晰
 
-Phase 1 开始 → 创建 Phase 1 的 TODO → 完成 → 清空 TODO → 🛑 STOP
-     ↓ 用户说"填好了"
-Phase 2-3 开始 → 创建 Phase 2-3 的 TODO → 完成 → 清空 TODO → 🛑 STOP
-     ↓ 用户说"批准方案"
-Phase 4-5 开始 → 创建 Phase 4-5 的 TODO → 完成 → 清空 TODO → 🛑 STOP
-     ↓ 用户确认
-Phase 6 开始 → 创建 Phase 6 的 TODO → 完成
-```
+- `Phase 1`：路径配置、环境检查、任务模板准备
+- `Phase 2`：读取任务并获取源码
+- `Phase 3`：输出 HarmonyOS 业务代码适配方案报告
+- `Phase 4`：实施业务代码适配方案，并生成业务适配报告
+- `Phase 5`：构建编译，允许边编译边修代码，直到产出 `.so`
+- `Phase 6`：交付与归档
 
-### 为什么这样做？
+### 2. STOP 点只保留两个
 
-| 问题 | 错误做法 | 正确做法 |
-|------|----------|----------|
-| **TODO CONTINUATION 误触发** | 所有 TODO 都存在，系统会强制继续 | 下一个 Phase 的 TODO 根本不存在 |
-| **AI 理解成本** | 需要记住复杂的 STOP 规则 | 自然理解"完成当前任务再说" |
-| **实现难度** | 需要修改系统机制 | 只需改变 TODO 创建时机 |
+- `STOP 1`：Phase 1 完成后，等待用户填写任务表
+- `STOP 2`：Phase 3 完成后，等待用户批准业务代码适配方案
 
-### TODO 管理口诀
+说明：
+- Phase 4 和 Phase 5 连续执行，中间不再停顿。
+- Phase 5 完成后不再 STOP，直接进入 Phase 6。
 
-> **"一批一清，确认再建"**
-> 
-> - **一批**：只创建当前 Phase 的 TODO
-> - **一清**：Phase 完成后清空 TODO
-> - **确认再建**：用户确认后才创建下一批
+### 3. TODO 管理
 
-### AI 执行者注意
+- 只创建当前阶段的 TODO，不提前创建后续阶段 TODO。
+- 一个阶段结束后，先清空 TODO，再决定是否进入 STOP。
+- Phase 4 和 Phase 5 视为连续执行阶段，但仍应在 TODO 中分别标识任务。
 
-**如果你在阅读本文档时准备开始工作：**
+## 流程总览
 
-1. **不要一次性创建所有 TODO** - 这是最常见的错误
-2. **只创建当前 Phase 的 TODO** - 例如 Phase 1 开始时只创建 Phase 1 的 3 个 TODO
-3. **完成后立即清空 TODO** - 使用 `todowrite([])`
-4. **然后 STOP** - 等待用户确认，不要继续
-5. **用户确认后** - 才创建下一批 TODO
+### Phase 1：准备
 
-**示例**：
+涉及文档：
+- [00-paths.md](./00-paths.md)
+- [01-env-check.md](./01-env-check.md)
+- [02-prepare-tasks.md](./02-prepare-tasks.md)
 
-```typescript
-// ✅ 正确：Phase 1 开始时
-todowrite([
-  { id: 1, content: "Phase 1-1: 路径配置" },
-  { id: 2, content: "Phase 1-2: 环境检查" },
-  { id: 3, content: "Phase 1-3: 生成任务模板" },
-])
+完成条件：
+- 路径变量可推导
+- Linux 或 WSL 环境可用
+- 已找到 HarmonyOS SDK，或者已要求用户补充 `COMMAND_LINE_TOOLS_ROOT`
+- 已找到 `tpc_c_cplusplus`，或者已尝试自动拉取
+- 已生成任务模板
 
-// Phase 1 完成后
-todowrite([])  // 清空 TODO
-// 🛑 STOP - 等待用户说"填好了"
+完成后动作：
+- 清空 Phase 1 TODO
+- STOP，等待用户说“填好了”
 
-// 用户说"填好了"后，才创建 Phase 2-3 的 TODO
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  // ...
-])
-```
-
----
-# HarmonyOS 三方库移植
-
-**定位**：AI 可执行的第三方 C/C++ 库鸿蒙化编译工作流
-
----
-
-## ⭐ 核心原则：TODO 管理
-
-**这是 AI 执行工作流的最重要原则，必须严格遵守！**
-
-### TODO 创建规则
-
-```
-❌ 错误做法：一次性创建所有 Phase 的 TODO
-✅ 正确做法：只创建当前 Phase 的 TODO，完成后清空，等待用户确认
-
-Phase 1 开始 → 创建 Phase 1 的 TODO → 完成 → 清空 TODO → 🛑 STOP
-     ↓ 用户说"填好了"
-Phase 2-3 开始 → 创建 Phase 2-3 的 TODO → 完成 → 清空 TODO → 🛑 STOP
-     ↓ 用户说"批准方案"
-Phase 4-5 开始 → 创建 Phase 4-5 的 TODO → 完成 → 清空 TODO → 🛑 STOP
-     ↓ 用户确认
-Phase 6 开始 → 创建 Phase 6 的 TODO → 完成
-```
-
-### 为什么这样做？
-
-| 问题 | 错误做法 | 正确做法 |
-|------|----------|----------|
-| **TODO CONTINUATION 误触发** | 所有 TODO 都存在，系统会强制继续 | 下一个 Phase 的 TODO 根本不存在 |
-| **AI 理解成本** | 需要记住复杂的 STOP 规则 | 自然理解"完成当前任务再说" |
-| **实现难度** | 需要修改系统机制 | 只需改变 TODO 创建时机 |
-
-### TODO 管理口诀
-
-> **"一批一清，确认再建"**
-> 
-> - **一批**：只创建当前 Phase 的 TODO
-> - **一清**：Phase 完成后清空 TODO
-> - **确认再建**：用户确认后才创建下一批
-
----
-
-## 完整工作流程（6 个 Phase，3 个决策点）
-
-### Phase 1: 前期准备（3 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 1-1 | [00-paths.md](./00-paths.md) | Phase 1-1: 路径配置 |
-| 1-2 | [01-env-check.md](./01-env-check.md) | Phase 1-2: 环境检查 |
-| 1-3 | [02-prepare-tasks.md](./02-prepare-tasks.md) | Phase 1-3: 生成任务模板 |
-
-**TODO 管理**：
-```typescript
-// Phase 1 开始时创建
-todowrite([
-  { id: 1, content: "Phase 1-1: 路径配置" },
-  { id: 2, content: "Phase 1-2: 环境检查" },
-  { id: 3, content: "Phase 1-3: 生成任务模板" },
-])
-
-// Phase 1 完成后清空
-todowrite([])
-
-// 发送消息并 STOP
-"✅ Phase 1 完成！模板已生成在 `libs/porting-tasks-2026-03-05.xlsx`
-请填写后告诉我'填好了'，我将继续 Phase 2-3"
-```
-
-> 🛑 **STOP - 等待用户决策 1**：等待用户说"填好了"
-
----
-
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-### Phase 2-3: 代码获取 + 分析方案（4 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 2-1 | [03-read-tasks.md](./03-read-tasks.md) | Phase 2-1: 读取 Excel |
-| 2-2 | [04-clone-code.md](./04-clone-code.md) | Phase 2-2: 克隆代码 |
-| 2-3 | [05-verify-code.md](./05-verify-code.md) | Phase 2-3: 验证版本 |
-| 3 | [06-code-analysis.md](./06-code-analysis.md) | Phase 3: 代码分析与适配方案 |
-
-**TODO 管理**：
-```typescript
-// 用户说"填好了"后创建
-todowrite([
-  { id: 1, content: "Phase 2-1: 读取 Excel" },
-  { id: 2, content: "Phase 2-2: 克隆代码" },
-  { id: 3, content: "Phase 2-3: 验证版本" },
-  { id: 4, content: "Phase 3: 代码分析与适配方案" },
-])
-```
-// Phase 2-3 完成后清空
-todowrite([])
-
-// 发送消息并 STOP
-"✅ 适配方案已生成！请审核 `reports/<库名>-adaptation-plan.md`
-如无异议请回复'批准方案'，我将继续 Phase 4-5"
-```
-
-> 🛑 **STOP - 等待用户决策 2**：等待用户说"批准方案"
-
----
-
-### Phase 4-5: 适配实施 + 构建编译（5 个子任务）✅
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 4-1 | [08-adaptation-implement.md](./08-adaptation-implement.md) | Phase 4-1: 适配实施 |
-| 4-2 | [09-adaptation-report.md](./09-adaptation-report.md) | Phase 4-2: 生成适配报告 |
-| 5-1 | [10-build-system-detect.md](./10-build-system-detect.md) | Phase 5-1: 构建系统识别 |
-| 5-2 | [11-cmake-build.md](./11-cmake-build.md) | Phase 5-2: CMake 编译 |
-
-**TODO 管理**：
-```typescript
-// 用户说"批准方案"后创建
-todowrite([
-  { id: 1, content: "Phase 4-1: 适配实施" },
-  { id: 2, content: "Phase 4-2: 生成适配报告" },
-  { id: 3, content: "Phase 5-1: 构建系统识别" },
-  { id: 4, content: "Phase 5-2: CMake 编译" },
-])
-
-// Phase 4-5 完成后清空
-todowrite([])
-
-// 发送消息并 STOP
-"✅ 编译完成！产物在 `outputs/<库名>/`
-请确认结果后回复'继续 Phase 6'，我将进行交付归档"
-```
-
-> 🛑 **STOP - 等待用户决策 3**：等待用户确认
-
----
-
-### Phase 6: 交付与归档（1 个子任务，待完善）
-
-| 步骤 | 文档 | TODO 内容 |
-|------|------|----------|
-| 6-1 | [12-delivery-archive.md](./12-delivery-archive.md) | Phase 6: 交付与归档 |
-
-**TODO 管理**：
-```typescript
-// 用户确认后创建
-todowrite([
-  { id: 1, content: "Phase 6: 交付与归档" },
-])
-
-// 完成后清空
-todowrite([])
-
-// 完成消息
-"✅ 全部完成！产物已交付，项目已归档"
-```
-
----
-
-## 用户决策点总结
-
-| 决策点 | Phase 过渡 | 用户需要做什么 | TODO 管理 |
-|--------|------------|----------------|----------|
-| **决策 1** | Phase 1 → Phase 2-3 | 填写 Excel 表格，确认"填好了" | 清空 Phase 1 TODO，创建 Phase 2-3 TODO |
-| **决策 2** | Phase 2-3 → Phase 4-5 | 审核批准适配方案 | 清空 Phase 2-3 TODO，创建 Phase 4-5 TODO |
-| **决策 3** | Phase 4-5 → Phase 6 | 确认编译结果，决定交付方式 | 清空 Phase 4-5 TODO，创建 Phase 6 TODO |
-
----
-
-## 快速索引
-
-- **Phase 1 准备** → [00-paths.md](./00-paths.md) → [01-env-check.md](./01-env-check.md) → [02-prepare-tasks.md](./02-prepare-tasks.md)
-- **Phase 2-3 获取 + 分析** → [03-read-tasks.md](./03-read-tasks.md) → [04-clone-code.md](./04-clone-code.md) → [05-verify-code.md](./05-verify-code.md) → [06-code-analysis.md](./06-code-analysis.md)
-- **Phase 4-5 实施 + 编译** → [08-adaptation-implement.md](./08-adaptation-implement.md) → [09-adaptation-report.md](./09-adaptation-report.md) → [10-build-system-detect.md](./10-build-system-detect.md) → [11-cmake-build.md](./11-cmake-build.md)
-- **Phase 6 交付** → [12-delivery-archive.md](./12-delivery-archive.md)
-
----
+### Phase 2：获取源码
+
+涉及文档：
+- [03-read-tasks.md](./03-read-tasks.md)
+- [04-clone-code.md](./04-clone-code.md)
+- [05-verify-code.md](./05-verify-code.md)
+
+完成条件：
+- 已读取任务表
+- 已克隆或下载目标库源码到 `libs/<库名>/`
+- 已核对版本、分支或 commit
+
+### Phase 3：业务代码适配方案分析
+
+涉及文档：
+- [06-code-analysis.md](./06-code-analysis.md)
+
+输出物：
+- `reports/<库名>-adaptation-plan.md`
+
+说明：
+- 本阶段只分析 HarmonyOS 业务代码适配点。
+- 本阶段不输出编译构建方案。
+- 本阶段的目标是识别需要替换的系统接口、平台宏、头文件、平台能力调用等。
+
+完成后动作：
+- 清空 Phase 2-3 TODO
+- STOP，等待用户批准方案
+
+### Phase 4：业务代码适配实施
+
+涉及文档：
+- [08-adaptation-implement.md](./08-adaptation-implement.md)
+- [09-adaptation-report.md](./09-adaptation-report.md)
+
+输出物：
+- `reports/<库名>-adaptation-report.md`
+
+说明：
+- 只实施已批准的业务代码适配方案。
+- 本阶段的修改记录在业务适配报告中。
+
+### Phase 5：构建编译
+
+涉及文档：
+- [10-build-system-detect.md](./10-build-system-detect.md)
+- [11-cmake-build.md](./11-cmake-build.md)
+
+输出物：
+- `outputs/<库名>/`
+- `reports/<库名>-build-report.md`
+- 必要时生成 `libs/<库名>/build.sh`
+
+策略：
+- 先尝试 `lycium`
+- `lycium` 失败后，先分类失败原因
+- 只有适合进入 fallback 时，才生成原生 `build.sh`
+- 编译期间允许根据报错继续修改代码，直到生成 `.so`
+
+### Phase 6：交付与归档
+
+涉及文档：
+- [12-delivery-archive.md](./12-delivery-archive.md)
+
+说明：
+- 汇总产物、报告、源码修改
+- 提醒用户关注两个报告：
+  - `reports/<库名>-adaptation-report.md`
+  - `reports/<库名>-build-report.md`
+- 更新任务表状态和报告路径
+
+## 默认路径约定
+
+- 当前仓库根目录：`PORTING_ROOT`
+- `lycium` 仓库目录：`$PORTING_ROOT/tpc_c_cplusplus`
+- HarmonyOS SDK 根目录变量：`COMMAND_LINE_TOOLS_ROOT`
+- 兼容给 `lycium` 的变量：`OHOS_SDK=$COMMAND_LINE_TOOLS_ROOT/sdk/default/openharmony`
+
+具体规则见 [00-paths.md](./00-paths.md)。
+
+## 推荐脚本
+
+- `scripts/check-env.sh`
+- `scripts/run-lycium-build.sh`
+- `scripts/init-build-script.sh`
+
+说明：
+- `run-lycium-build.sh` 是模板脚本。
+- AI 应复制出按库名命名的脚本，例如 `scripts/run-lycium-build-zlib.sh`，填写后再执行。
 
 ## AI 执行检查清单
 
-在开始每个 Phase 前，确认：
+- [ ] 当前阶段职责是否正确，没有跨阶段输出错误内容
+- [ ] 是否只在 Phase 1 做环境检查
+- [ ] Phase 3 是否只产出业务代码适配方案
+- [ ] Phase 5 是否遵循 `lycium -> 失败分类 -> fallback -> 边编译边修 -> 产出 .so`
+- [ ] Phase 5 完成后是否直接进入交付
+- [ ] 是否避免写死机器绝对路径
 
-- [ ] 上一 Phase 的 TODO 已清空
-- [ ] 用户已确认（决策点后）
-- [ ] 只创建当前 Phase 的 TODO，不预先创建后续 Phase
-- [ ] TODO 内容清晰明确（包含 Phase 编号和任务描述）
-
-在每个 Phase 完成后，确认：
-
-- [ ] 所有 TODO 已标记为 completed
-- [ ] 清空 TODO 列表
-- [ ] 发送完成消息
-- [ ] 如果是决策点后，明确告知用户下一步操作
-
----
-
-*最后更新：2026-03-05*
