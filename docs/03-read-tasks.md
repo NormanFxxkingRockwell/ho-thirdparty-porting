@@ -35,6 +35,18 @@
 - 库名
 - Git 仓库
 
+推荐执行：
+
+```bash
+bash scripts/read-task-sheet.sh --format tsv
+```
+
+说明：
+- 该脚本会读取正式任务表并只输出有效任务行
+- 默认优先读取 `libs/` 中最新的 `porting-tasks-YYYY-MM-DD.xlsx`
+- 若宿主已有 `python3 + openpyxl`，脚本直接解析
+- 若仅缺 `openpyxl`，脚本会优先尝试自动安装
+
 ### 3. 规范化字段
 
 建议统一成：

@@ -66,6 +66,12 @@
 
 ### 4. 输出方案报告
 
+可选先初始化模板：
+
+```bash
+bash scripts/init-report-templates.sh --lib-name <库名>
+```
+
 建议报告结构：
 
 ```markdown
@@ -106,4 +112,3 @@ Phase 3 完成后：
 ## 下一步
 
 用户批准后进入 [08-adaptation-implement.md](./08-adaptation-implement.md)。
-

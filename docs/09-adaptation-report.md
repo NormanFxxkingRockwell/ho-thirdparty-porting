@@ -7,6 +7,12 @@
 
 - `reports/<库名>-adaptation-report.md`
 
+可选先初始化模板：
+
+```bash
+bash scripts/init-report-templates.sh --lib-name <库名>
+```
+
 ## 报告边界
 
 本报告只记录：
@@ -51,4 +57,3 @@
 ## 下一步
 
 进入 [10-build-system-detect.md](./10-build-system-detect.md)。
-

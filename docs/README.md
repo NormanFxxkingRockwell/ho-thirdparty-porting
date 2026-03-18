@@ -160,6 +160,8 @@
 
 - `scripts/check-env.sh`
 - `scripts/prepare-task-sheet.sh`
+- `scripts/read-task-sheet.sh`
+- `scripts/init-report-templates.sh`
 - `scripts/run-lycium-build.sh`
 - `scripts/init-build-script.sh`
 

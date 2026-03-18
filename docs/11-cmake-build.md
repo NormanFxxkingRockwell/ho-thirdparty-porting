@@ -92,6 +92,12 @@ bash scripts/check-env.sh --mode lycium
 - 关键命令
 - 结果与报错摘要
 
+如尚未创建构建报告骨架，可先执行：
+
+```bash
+bash scripts/init-report-templates.sh --lib-name <库名>
+```
+
 如果 recipe 位于 `community/`：
 - 执行脚本必须兼容 `lycium/build.sh` 对 `thirdparty/` 的实际查找行为
 - 不能依赖用户手工创建软链接
