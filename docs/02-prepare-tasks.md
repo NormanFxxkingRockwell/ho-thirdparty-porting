@@ -14,7 +14,7 @@
 
 ## AI 执行步骤
 
-### 1. 检查 `libs/` 下是否已有当天模板
+### 1. 检查 `libs/` 下是否已有当天正式任务表
 
 命名规则：
 
@@ -22,7 +22,17 @@
 porting-tasks-YYYY-MM-DD.xlsx
 ```
 
-### 2. 如无模板则生成
+### 2. 如无正式任务表则生成
+
+推荐执行：
+
+```bash
+bash scripts/prepare-task-sheet.sh
+```
+
+说明：
+- 该脚本会把 `libs/porting-tasks-模板.xlsx` 复制为当天正式任务表。
+- `libs/porting-tasks-模板.xlsx` 只作为模板，不允许直接作为 Phase 2 输入。
 
 模板至少包含这些字段：
 
@@ -45,6 +55,7 @@ porting-tasks-YYYY-MM-DD.xlsx
 
 ```text
 任务模板已准备完成：libs/porting-tasks-YYYY-MM-DD.xlsx
+模板文件 libs/porting-tasks-模板.xlsx 不直接参与后续阶段。
 请填写待移植库信息，完成后回复“填好了”。
 ```
 
@@ -58,4 +69,3 @@ Phase 1 完成后：
 ## 下一步
 
 用户确认填写完成后，进入 [03-read-tasks.md](./03-read-tasks.md)。
-

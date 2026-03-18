@@ -33,6 +33,8 @@
 说明：
 - Phase 4 和 Phase 5 连续执行，中间不再停顿。
 - Phase 5 完成后不再 STOP，直接进入 Phase 6。
+- 测试流程时也必须严格执行 STOP。
+- 到达 STOP 后，AI 只能汇报当前阶段结果并等待用户明确继续，不能自行推进到下一阶段。
 
 ### 3. TODO 管理
 
@@ -130,6 +132,8 @@
 - 走 `lycium` 时，主输入是 `pkgname + HPKBUILD`。
 - `lycium` 的宿主机前置只在进入 `lycium` 前检查，不应回溯为整个 Phase 1 的统一硬门槛。
 - 走 fallback 时，主输入是 `libs/<库名>/` 中的源码和 AI 生成的 `build.sh`。
+- Phase 5 成功不只看命令退出码或 `.so` 是否存在。
+- 还必须检查 patch 是否产生 `.rej`，以及关键日志中是否存在 `FAILED` 等失败信号。
 
 ### Phase 6：交付与归档
 
@@ -155,6 +159,7 @@
 ## 推荐脚本
 
 - `scripts/check-env.sh`
+- `scripts/prepare-task-sheet.sh`
 - `scripts/run-lycium-build.sh`
 - `scripts/init-build-script.sh`
 
@@ -162,6 +167,7 @@
 - `run-lycium-build.sh` 是模板脚本。
 - AI 应复制出按库名命名的脚本，例如 `scripts/run-lycium-build-zlib.sh`，填写后再执行。
 - 该脚本应以 `pkgname/HPKBUILD` 为中心，不应把 `SOURCE_DIR` 作为默认必填主输入。
+- 若 recipe 位于 `community/`，脚本应自行兼容 `lycium/build.sh` 的实际查找行为，不能要求用户手工补软链接。
 
 ## AI 执行检查清单
 
@@ -170,4 +176,6 @@
 - [ ] Phase 3 是否只产出业务代码适配方案
 - [ ] Phase 5 是否遵循 `lycium -> 失败分类 -> fallback -> 边编译边修 -> 产出 .so`
 - [ ] Phase 5 完成后是否直接进入交付
+- [ ] 遇到 STOP 后是否真正停止并等待用户继续
+- [ ] Phase 5 是否检查 `.rej` 和构建日志失败信号
 - [ ] 是否避免写死机器绝对路径

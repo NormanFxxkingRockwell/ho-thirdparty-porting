@@ -17,6 +17,7 @@ PKGNAME=""
 ARCH="arm64-v8a"
 HPK_DIR=""
 RECIPE_SCOPE=""
+TEMP_LINK=""
 
 fail() {
   echo "ERROR: $*" >&2
@@ -43,7 +44,49 @@ prepare_lycium_toolchain_wrappers() {
   rm -rf "$tmp_dir"
 }
 
+ensure_recipe_visible_to_lycium() {
+  local thirdparty_dir="$LYCIUM_ROOT/thirdparty"
+  local expected_dir="$thirdparty_dir/$PKGNAME"
+
+  if [[ "$HPK_DIR" == "$expected_dir" ]]; then
+    return 0
+  fi
+
+  mkdir -p "$thirdparty_dir"
+
+  if [[ -e "$expected_dir" ]]; then
+    fail "lycium expects recipe at $expected_dir, but a different path already exists."
+  fi
+
+  ln -s "$HPK_DIR" "$expected_dir"
+  TEMP_LINK="$expected_dir"
+}
+
+cleanup() {
+  if [[ -n "$TEMP_LINK" && -L "$TEMP_LINK" ]]; then
+    rm -f "$TEMP_LINK"
+  fi
+}
+
+check_build_failures() {
+  local reject_count
+  reject_count="$(find "$HPK_DIR" -name '*.rej' | wc -l | tr -d ' ')"
+  if [[ "$reject_count" != "0" ]]; then
+    fail "Detected .rej files under recipe directory: $HPK_DIR"
+  fi
+
+  local latest_log=""
+  latest_log="$(find "$HPK_DIR" -maxdepth 1 -type f -name '*lycium_build.log' | sort | tail -n 1)"
+  if [[ -n "$latest_log" ]]; then
+    if grep -Eq '(^|[^A-Za-z])(FAILED|error:|CMake Error|configure: error|ld: error)' "$latest_log"; then
+      fail "Detected failure markers in lycium build log: $latest_log"
+    fi
+  fi
+}
+
 main() {
+  trap cleanup EXIT
+
   [[ -n "$LIB_NAME" ]] || fail "LIB_NAME is required."
   [[ -n "$PKGNAME" ]] || fail "PKGNAME is required."
 
@@ -80,6 +123,7 @@ main() {
   export PATH="$OHOS_SDK/native/build-tools/cmake/bin:$PATH"
 
   prepare_lycium_toolchain_wrappers
+  ensure_recipe_visible_to_lycium
 
   echo "Running lycium build"
   echo "  LIB_NAME=$LIB_NAME"
@@ -91,6 +135,8 @@ main() {
     cd "$LYCIUM_ROOT/lycium"
     ./build.sh "$PKGNAME"
   )
+
+  check_build_failures
 }
 
 main "$@"

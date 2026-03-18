@@ -1,3 +1,14 @@
 tpc_c_cplusplus
 command-line-tools
 tmp
+
+# User-side execution artifacts
+reports/*
+!reports/.gitkeep
+
+outputs/*
+!outputs/.gitkeep
+
+libs/*
+!libs/.gitkeep
+!libs/porting-tasks-模板.xlsx

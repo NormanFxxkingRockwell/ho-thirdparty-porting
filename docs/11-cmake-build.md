@@ -92,6 +92,10 @@ bash scripts/check-env.sh --mode lycium
 - 关键命令
 - 结果与报错摘要
 
+如果 recipe 位于 `community/`：
+- 执行脚本必须兼容 `lycium/build.sh` 对 `thirdparty/` 的实际查找行为
+- 不能依赖用户手工创建软链接
+
 ## 第四步：失败分类
 
 按 [10-build-system-detect.md](./10-build-system-detect.md) 中定义的四类分类：
@@ -196,6 +200,20 @@ readelf -h outputs/<库名>/*.so
 nm -D outputs/<库名>/*.so | head
 ```
 
+### 5. patch 与日志失败检查
+
+至少检查：
+
+```bash
+find tpc_c_cplusplus -name '*.rej'
+grep -RIn 'FAILED' tpc_c_cplusplus/community/<pkgname> tpc_c_cplusplus/thirdparty/<pkgname>
+```
+
+判定规则：
+- 如果存在新生成的 `.rej` 文件，本轮构建不能直接判成功
+- 如果关键构建日志中出现 patch failure、`FAILED`、configure error、link error 等失败信号，也不能直接判成功
+- 只有“产物通过 + 无 patch reject + 无关键失败信号”时，Phase 5 才能判成功
+
 ## 第十步：输出构建报告
 
 建议报告结构：
@@ -217,6 +235,8 @@ nm -D outputs/<库名>/*.so | head
 - [ ] 最终已生成 `.so`
 - [ ] 架构为 `arm64-v8a / AArch64`
 - [ ] 产物已放入 `outputs/<库名>/`
+- [ ] 未发现新的 `.rej` 文件
+- [ ] 关键日志未出现未处理失败信号
 - [ ] `reports/<库名>-build-report.md` 已生成
 
 ## 下一步
