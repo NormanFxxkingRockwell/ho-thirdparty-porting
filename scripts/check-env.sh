@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PORTING_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LYCIUM_ROOT="${LYCIUM_ROOT:-$PORTING_ROOT/tpc_c_cplusplus}"
 DEFAULT_ARCH="${DEFAULT_OHOS_ARCH:-arm64-v8a}"
+DEVICE_TARGET_DIR_BASE="/data/local/tmp"
 MODE="base"
 HOST_TOOLS=(
   gcc
@@ -31,7 +32,8 @@ usage() {
 Usage: bash scripts/check-env.sh [--mode base|lycium]
 
 Modes:
-  base    Check Linux/WSL, Command Line Tools, OHOS_SDK, ARM64 toolchain, SDK cmake, toolchain file.
+  base    Check Linux/WSL, Command Line Tools, OHOS_SDK, ARM64 toolchain, SDK cmake, toolchain file,
+          and basic device connection state.
   lycium  Run base checks, then additionally check lycium host-side prerequisites.
 EOF
 }
@@ -67,20 +69,21 @@ parse_args() {
 }
 
 find_command_line_tools_root() {
-  if [[ -n "${COMMAND_LINE_TOOLS_ROOT:-}" && -d "${COMMAND_LINE_TOOLS_ROOT}" ]]; then
+  if [[ -n "${COMMAND_LINE_TOOLS_ROOT:-}" && -x "${COMMAND_LINE_TOOLS_ROOT}/sdk/default/openharmony/native/llvm/bin/clang" ]]; then
     printf '%s\n' "${COMMAND_LINE_TOOLS_ROOT}"
     return 0
   fi
 
   local candidates=(
     "$PORTING_ROOT/../command-line-tools"
+    "$PORTING_ROOT/command-line-tools"
     "$HOME/command-line-tools"
     "/opt/command-line-tools"
   )
 
   local candidate
   for candidate in "${candidates[@]}"; do
-    if [[ -d "$candidate" ]]; then
+    if [[ -x "$candidate/sdk/default/openharmony/native/llvm/bin/clang" ]]; then
       printf '%s\n' "$candidate"
       return 0
     fi
@@ -115,6 +118,37 @@ check_host_tools() {
   fi
 }
 
+collect_hdc_candidates() {
+  local candidates=()
+
+  if [[ -n "${HDC_PATH:-}" && -x "${HDC_PATH}" ]]; then
+    candidates+=("${HDC_PATH}")
+  fi
+
+  if command -v hdc >/dev/null 2>&1; then
+    candidates+=("$(command -v hdc)")
+  fi
+
+  local defaults=(
+    "$COMMAND_LINE_TOOLS_ROOT/sdk/default/openharmony/toolchains/hdc"
+    "/mnt/c/Users/aoqiduan/Desktop/env/OH_SDK/ohos-sdk/toolchains/hdc.exe"
+  )
+
+  local candidate
+  for candidate in "${defaults[@]}"; do
+    if [[ -x "$candidate" ]]; then
+      candidates+=("$candidate")
+    fi
+  done
+
+  printf '%s\n' "${candidates[@]}" | awk 'NF && !seen[$0]++'
+}
+
+list_hdc_targets() {
+  local hdc_bin="$1"
+  "$hdc_bin" list targets 2>/dev/null | tr -d '\r' | sed '/^[[:space:]]*$/d' || true
+}
+
 main() {
   parse_args "$@"
 
@@ -143,37 +177,58 @@ main() {
   local sdk_cmake="$OHOS_SDK/native/build-tools/cmake/bin/cmake"
   local toolchain_file="$OHOS_SDK/native/build/cmake/ohos.toolchain.cmake"
 
-  if [[ ! -x "$OHOS_SDK/native/llvm/bin/clang" ]]; then
-    echo "ERROR: clang not found under OHOS_SDK: $OHOS_SDK" >&2
-    exit 1
-  fi
-
+  [[ -x "$OHOS_SDK/native/llvm/bin/clang" ]] || { echo "ERROR: clang not found under OHOS_SDK: $OHOS_SDK" >&2; exit 1; }
   if [[ ! -e "$OHOS_SDK/native/llvm/bin/aarch64-linux-ohos-clang" && ! -e "$OHOS_SDK/native/llvm/bin/aarch64-unknown-linux-ohos-clang" ]]; then
     echo "ERROR: no ARM64 HarmonyOS compiler found under: $OHOS_SDK/native/llvm/bin" >&2
     exit 1
   fi
+  [[ -x "$sdk_cmake" ]] || { echo "ERROR: SDK cmake not found at: $sdk_cmake" >&2; exit 1; }
+  [[ -f "$toolchain_file" ]] || { echo "ERROR: HarmonyOS toolchain file not found at: $toolchain_file" >&2; exit 1; }
 
   ensure_lycium_repo
-
-  if [[ ! -f "$LYCIUM_ROOT/lycium/template/HPKBUILD" ]]; then
-    echo "ERROR: lycium template/HPKBUILD is missing." >&2
-    exit 1
-  fi
-
-  if [[ ! -x "$sdk_cmake" ]]; then
-    echo "ERROR: SDK cmake not found at: $sdk_cmake" >&2
-    exit 1
-  fi
-
-  if [[ ! -f "$toolchain_file" ]]; then
-    echo "ERROR: HarmonyOS toolchain file not found at: $toolchain_file" >&2
-    exit 1
-  fi
+  [[ -f "$LYCIUM_ROOT/lycium/template/HPKBUILD" ]] || { echo "ERROR: lycium template/HPKBUILD is missing." >&2; exit 1; }
 
   local lycium_ready="skipped"
   if [[ "$MODE" == "lycium" ]]; then
     check_host_tools
     lycium_ready="true"
+  fi
+
+  local hdc_path=""
+  local hdc_ready="false"
+  local device_connected="false"
+  local hdc_targets="none"
+  local hdc_device_test_ready="false"
+  local fallback_hdc_path=""
+  local fallback_hdc_targets="none"
+  local candidate
+  while IFS= read -r candidate; do
+    [[ -n "$candidate" ]] || continue
+    hdc_ready="true"
+    local targets_raw
+    targets_raw="$(list_hdc_targets "$candidate")"
+    local targets
+    targets="$(printf '%s\n' "$targets_raw" | tr '\n' ',' | sed 's/,$//')"
+
+    if [[ -z "$fallback_hdc_path" ]]; then
+      fallback_hdc_path="$candidate"
+      if [[ -n "$targets" && "$targets" != "[Empty]" ]]; then
+        fallback_hdc_targets="$targets"
+      fi
+    fi
+
+    if [[ -n "$targets" && "$targets" != "[Empty]" ]]; then
+      hdc_path="$candidate"
+      hdc_targets="$targets"
+      device_connected="true"
+      hdc_device_test_ready="true"
+      break
+    fi
+  done < <(collect_hdc_candidates)
+
+  if [[ -z "$hdc_path" && -n "$fallback_hdc_path" ]]; then
+    hdc_path="$fallback_hdc_path"
+    hdc_targets="$fallback_hdc_targets"
   fi
 
   cat <<EOF
@@ -190,6 +245,13 @@ DEFAULT_OHOS_ARCH=$DEFAULT_ARCH
 IS_WSL=$is_wsl
 BASE_ENV_READY=true
 LYCIUM_ENV_READY=$lycium_ready
+HDC_PATH=${hdc_path:-not-found}
+HDC_READY=$hdc_ready
+HDC_TARGETS=$hdc_targets
+DEVICE_CONNECTED=$device_connected
+HDC_DEVICE_TEST_READY=$hdc_device_test_ready
+DEVICE_TEST_READY=$hdc_device_test_ready
+DEVICE_TARGET_DIR_BASE=$DEVICE_TARGET_DIR_BASE
 EOF
 }
 

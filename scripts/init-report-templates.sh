@@ -90,7 +90,13 @@ ADAPTATION_PLAN_CONTENT=$(cat <<EOF
 
 - 待补充
 
-## 6. 给 Phase 5 的最小交接摘要
+## 6. 可复用测试入口与指导
+
+- 上游 test program / example / CLI：待补充
+- 优先推荐的运行命令：待补充
+- 如无现成入口，是否需要最小测试驱动：待补充
+
+## 7. 给 Phase 5 的最小交接摘要
 
 - 构建系统类型：待补充
 - 是否发现现成 \`HPKBUILD\`：待补充
@@ -119,7 +125,13 @@ ADAPTATION_REPORT_CONTENT=$(cat <<EOF
 
 - 待补充
 
-## 5. 交接给 Phase 5 的说明
+## 5. 测试入口与使用建议
+
+- 优先 test program 路径：待补充
+- 候选最小测试驱动：待补充
+- 关键 API / 参数 / 样例输入：待补充
+
+## 6. 交接给 Phase 5 的说明
 
 - 待补充
 EOF
@@ -148,11 +160,33 @@ BUILD_REPORT_CONTENT=$(cat <<EOF
 
 - 待补充
 
-## 6. 产物校验结果
+## 6. 产物概览
+
+- build-pass：待补充
+- binary-pass：待补充
+- device-pass：待补充
+- \`.so\` 路径：待补充
+- binary 路径：待补充
+
+## 7. binary 验证方式
+
+- binary 来源类型：\`test program\` / \`minimal test driver\`
+- 运行命令：待补充
+- 返回码：待补充
+- 关键输出：待补充
+
+## 8. 设备测试记录
+
+- hdc 推送目录：\`/data/local/tmp/$LIB_NAME/\`
+- hdc 推送命令：待补充
+- 设备执行命令：待补充
+- 设备侧输出：待补充
+
+## 9. 产物校验结果
 
 - 待补充
 
-## 7. 最终产物路径
+## 10. 最终产物路径
 
 - 待补充
 EOF

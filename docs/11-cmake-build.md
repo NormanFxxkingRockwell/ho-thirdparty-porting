@@ -1,14 +1,16 @@
 # Phase 5-2：构建编译执行
 
 说明：
-- 本文件名保留为 `11-cmake-build.md` 以兼容现有结构
-- 但内容已改为 Phase 5 的通用构建执行流程
+- 本文件名保留为 `11-cmake-build.md`
+- 内容表示 Phase 5 的通用构建执行流程
 
 目标：
-- 优先使用 `lycium` 构建
+- 优先使用 `lycium`
 - 失败后分类
-- 需要时进入原生 fallback
+- 合适时进入 fallback
 - 允许边编译边修代码，直到产出 `.so`
+- 尽量同时产出测试 binary
+- 设备测试阶段默认优先调用 `harmonyos-dev-mcp`，失败再 fallback 到 `hdc`
 
 ## 输入
 
@@ -18,9 +20,11 @@
 
 ## 输出
 
-- `outputs/<库名>/`
+- `outputs/<库名>/lib/`
+- `outputs/<库名>/bin/`
 - `reports/<库名>-build-report.md`
 - 必要时：`libs/<库名>/build.sh`
+- 必要时：`libs/<库名>/test-driver/`
 
 ## 标准主路径
 
@@ -30,221 +34,73 @@ lycium 优先
 -> 适合则 fallback
 -> 边编译边修
 -> 产出 .so
+-> 优先复用 test program
+-> 必要时生成 minimal test driver
+-> mcp 设备测试
+-> 失败则 hdc fallback
 ```
 
-## 第一步：准备 lycium 执行脚本
+## binary 生成策略
 
-模板脚本：
+优先级固定如下：
 
-```text
-scripts/run-lycium-build.sh
-```
+1. 上游已有 test program / example / CLI
+2. 上游已有可复用测试入口
+3. 生成最小测试驱动
 
-实际执行前：
-- 复制一份按库名命名的脚本
-- 例如：`scripts/run-lycium-build-zlib.sh`
-- 由 AI 填入本库专用变量
-
-建议填写内容：
-- `LIB_NAME`
-- `ARCH=arm64-v8a`
-- `PKGNAME`
-- `HPK_DIR`
-
-进入 `lycium` 前先执行：
+若没有现成入口，可执行：
 
 ```bash
-bash scripts/check-env.sh --mode lycium
+bash scripts/init-test-driver.sh --lib-name <库名> --language c
 ```
 
-说明：
-- 这里只检查 `lycium` 自身额外需要的宿主机命令
-- 不应把这一组检查回写成整个仓库在 Phase 1 的统一硬门槛
-
-## 第二步：优先尝试 lycium
-
-典型做法：
-
-1. 复用已有 `HPKBUILD`
-2. 若无现成 `HPKBUILD`，从模板复制并填写最小可用版本
-3. 按官方正文准备 `lycium/Buildtools` 中的封装编译器脚本到 `$OHOS_SDK/native/llvm/bin`
-4. 在 `tpc_c_cplusplus/lycium/` 下执行：
+或：
 
 ```bash
-./build.sh <pkgname>
+bash scripts/init-test-driver.sh --lib-name <库名> --language cpp
 ```
 
-其中 `<pkgname>` 对应 `HPKBUILD` 所在目录名。
+## 设备测试
 
-补充说明：
-- `lycium` 主路径以 `pkgname + HPKBUILD` 为输入
-- `libs/<库名>/` 的源码分析结果，可用于生成或修正 `HPKBUILD`
-- 但不应在文档里假设 `lycium` 会直接从 `libs/<库名>/` 开始构建
-- `lycium` 当前上游实现还会检查宿主机上的 `cmake/pkg-config/autoconf/automake/ninja` 等命令
-- 这属于 `lycium` 实现约束，不等于所有 HarmonyOS 交叉编译路径的统一前置
+设备测试主通道：
+- `harmonyos-dev-mcp`
 
-## 第三步：记录 lycium 结果
+补充 fallback：
+- `hdc`
 
-无论成功或失败，都要在 `reports/<库名>-build-report.md` 中记录：
-- 使用的 `HPKBUILD` 路径
-- 是否复用现有 recipe
-- 是否新建或修改 recipe
-- 关键命令
-- 结果与报错摘要
+要求：
+- 真实推送到设备
+- 真实执行
+- 记录实际使用的是 `harmonyos-dev-mcp` 还是 `hdc fallback`
+- 记录返回码和关键输出
 
-如尚未创建构建报告骨架，可先执行：
+典型 `hdc` fallback 动作：
 
 ```bash
-bash scripts/init-report-templates.sh --lib-name <库名>
+hdc file send outputs/<库名>/bin/<binary> /data/local/tmp/<库名>/
+hdc shell chmod +x /data/local/tmp/<库名>/<binary>
+hdc shell /data/local/tmp/<库名>/<binary> [args...]
 ```
 
-如果 recipe 位于 `community/`：
-- 执行脚本必须兼容 `lycium/build.sh` 对 `thirdparty/` 的实际查找行为
-- 不能依赖用户手工创建软链接
+## 构建报告要求
 
-## 第四步：失败分类
-
-按 [10-build-system-detect.md](./10-build-system-detect.md) 中定义的四类分类：
-- 环境缺失
-- HPKBUILD / recipe 问题
-- 源码问题
-- 构建系统 / 工具链问题
-
-## 第五步：决定是否 fallback
-
-### 不进入 fallback
-
-情形：
-- 环境缺失，需用户处理
-- recipe 问题仍值得再修一次
-
-### 进入 fallback
-
-情形：
-- `lycium` 无法表达当前库构建逻辑
-- 继续修 recipe 成本过高
-- 源码与构建系统更适合直接原生命令
-
-## 第六步：生成原生 build.sh
-
-通过：
-
-```bash
-scripts/init-build-script.sh
-```
-
-生成：
-
-```text
-libs/<库名>/build.sh
-```
-
-按构建系统生成模板：
-- `cmake`
-- `configure`
-- `make`
-- `gn`
-
-## 第七步：执行 fallback 编译
-
-执行：
-
-```bash
-bash libs/<库名>/build.sh
-```
-
-执行时允许持续迭代：
-- 遇到编译报错
-- 分析报错属于源码问题、构建配置问题还是链接问题
-- 做最小必要 patch
-- 重新执行编译
-
-## 第八步：边编译边修
-
-允许修复的典型问题：
-- 缺少 `-fPIC`
-- 共享库构建选项未开启
-- HarmonyOS 头文件或接口差异
-- CMake / Make / configure 的平台判断问题
-- 链接项缺失
-- 源码中暴露出来的平台不兼容点
-
-这些修改必须写入：
-- `reports/<库名>-build-report.md`
-
-## 第九步：产物校验
-
-至少校验以下内容：
-
-### 1. 文件存在
-
-```bash
-ls -lh outputs/<库名>/
-```
-
-### 2. 架构正确
-
-```bash
-file outputs/<库名>/*.so
-```
-
-期望：
-- `AArch64`
-
-### 3. ELF 类型正确
-
-```bash
-readelf -h outputs/<库名>/*.so
-```
-
-期望：
-- `Type: DYN`
-
-### 4. 导出符号存在
-
-```bash
-nm -D outputs/<库名>/*.so | head
-```
-
-### 5. patch 与日志失败检查
-
-至少检查：
-
-```bash
-find tpc_c_cplusplus -name '*.rej'
-grep -RIn 'FAILED' tpc_c_cplusplus/community/<pkgname> tpc_c_cplusplus/thirdparty/<pkgname>
-```
-
-判定规则：
-- 如果存在新生成的 `.rej` 文件，本轮构建不能直接判成功
-- 如果关键构建日志中出现 patch failure、`FAILED`、configure error、link error 等失败信号，也不能直接判成功
-- 只有“产物通过 + 无 patch reject + 无关键失败信号”时，Phase 5 才能判成功
-
-## 第十步：输出构建报告
-
-建议报告结构：
-
-```markdown
-# <库名> 构建报告
-
-## 1. 构建系统识别结果
-## 2. lycium 尝试记录
-## 3. 失败分类与决策
-## 4. fallback 执行记录
-## 5. 编译驱动型代码修改
-## 6. 产物校验结果
-## 7. 最终产物路径
-```
+构建报告必须明确记录：
+- `build-pass`
+- `binary-pass`
+- `device-pass`
+- binary 来源类型是 `test program` 还是 `minimal test driver`
+- 设备测试通道是 `harmonyos-dev-mcp` 还是 `hdc fallback`
+- 执行命令
+- 返回码
+- 关键输出
 
 ## 完成标准
 
 - [ ] 最终已生成 `.so`
-- [ ] 架构为 `arm64-v8a / AArch64`
-- [ ] 产物已放入 `outputs/<库名>/`
+- [ ] `.so` 架构为 `arm64-v8a / AArch64`
+- [ ] `.so` 已放入 `outputs/<库名>/lib/`
+- [ ] 若存在 binary，已放入 `outputs/<库名>/bin/`
+- [ ] build report 中已明确 binary 来源类型
+- [ ] build report 中已明确设备测试通道
 - [ ] 未发现新的 `.rej` 文件
 - [ ] 关键日志未出现未处理失败信号
-- [ ] `reports/<库名>-build-report.md` 已生成
-
-## 下一步
-
-Phase 5 完成后，不再 STOP，直接进入 [12-delivery-archive.md](./12-delivery-archive.md)。
