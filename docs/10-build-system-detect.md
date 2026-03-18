@@ -13,6 +13,7 @@
 
 - `libs/<库名>/`
 - `reports/<库名>-adaptation-report.md`
+- `reports/<库名>-adaptation-plan.md` 中的 Phase 5 最小交接摘要
 
 ## 输出
 
@@ -40,6 +41,10 @@ AI 必须先判断：
 - `tpc_c_cplusplus/thirdparty/<库名>/HPKBUILD`
 - `tpc_c_cplusplus/community/<库名>/HPKBUILD`
 
+说明：
+- 这里的 `<库名>` 不一定与 `libs/<库名>/` 完全同名
+- 允许 AI 根据已有 recipe 名称、上游项目名、pkgname 做映射判断
+
 ### 2. 若无现成 HPKBUILD，是否适合新建
 
 适合新建的典型条件：
@@ -61,13 +66,17 @@ AI 必须先判断：
 
 例如：
 - `OHOS_SDK` 不可用
-- 编译工具缺失
+- `lycium` 宿主机前置缺失
 - `lycium` 目录损坏
 
 处理：
 - 记录为环境类失败
 - 向用户报告
 - 不直接进入 fallback
+
+说明：
+- 这里的“环境缺失”是指 `lycium` 执行前置缺失
+- 不应倒推为整个仓库在 Phase 1 的统一失败
 
 ### B. HPKBUILD / recipe 问题
 
@@ -79,6 +88,9 @@ AI 必须先判断：
 处理：
 - AI 优先修正 `HPKBUILD`
 - 允许重试 `lycium`
+
+说明：
+- `lycium` 的核心输入是 recipe，不是 `libs/<库名>/` 里的源码目录
 
 ### C. 源码问题
 
@@ -123,7 +135,9 @@ libs/<库名>/build.sh
 - 路径从 [00-paths.md](./00-paths.md) 推导
 - 不硬编码机器绝对路径
 
+说明：
+- fallback 才直接以 `libs/<库名>/` 为主目录进行编译
+
 ## 下一步
 
 识别完成后进入 [11-cmake-build.md](./11-cmake-build.md)。
-

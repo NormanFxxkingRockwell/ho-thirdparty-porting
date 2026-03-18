@@ -22,6 +22,11 @@ libs/<库名>/
 说明：
 - 不要把源码放到 `outputs/`、`reports/` 或仓库外其他临时目录
 - 允许覆盖重新拉取，但要先确认不会误删用户已有重要修改
+- 当前目录主要服务于：
+  - Phase 3 代码分析
+  - Phase 4 业务适配
+  - Phase 5 fallback 原生构建
+- 如果 Phase 5 走 `lycium`，该目录不自动等于 `lycium` 的实际输入目录
 
 ## AI 执行步骤
 
@@ -46,6 +51,12 @@ git clone <repo_url> libs/<lib_name>
 - tag
 - branch
 - commit
+
+### 4. 记录源码与 recipe 的关系
+
+如果后续准备走 `lycium`，AI 需要额外判断：
+- 是否已有现成 `HPKBUILD`
+- 是否需要根据 `libs/<库名>/` 的分析结果新建或修正 recipe
 
 ## 失败处理
 

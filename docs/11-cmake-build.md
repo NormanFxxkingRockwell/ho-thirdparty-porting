@@ -48,8 +48,18 @@ scripts/run-lycium-build.sh
 建议填写内容：
 - `LIB_NAME`
 - `ARCH=arm64-v8a`
+- `PKGNAME`
 - `HPK_DIR`
-- `SOURCE_DIR`
+
+进入 `lycium` 前先执行：
+
+```bash
+bash scripts/check-env.sh --mode lycium
+```
+
+说明：
+- 这里只检查 `lycium` 自身额外需要的宿主机命令
+- 不应把这一组检查回写成整个仓库在 Phase 1 的统一硬门槛
 
 ## 第二步：优先尝试 lycium
 
@@ -57,13 +67,21 @@ scripts/run-lycium-build.sh
 
 1. 复用已有 `HPKBUILD`
 2. 若无现成 `HPKBUILD`，从模板复制并填写最小可用版本
-3. 在 `tpc_c_cplusplus/lycium/` 下执行：
+3. 按官方正文准备 `lycium/Buildtools` 中的封装编译器脚本到 `$OHOS_SDK/native/llvm/bin`
+4. 在 `tpc_c_cplusplus/lycium/` 下执行：
 
 ```bash
 ./build.sh <pkgname>
 ```
 
 其中 `<pkgname>` 对应 `HPKBUILD` 所在目录名。
+
+补充说明：
+- `lycium` 主路径以 `pkgname + HPKBUILD` 为输入
+- `libs/<库名>/` 的源码分析结果，可用于生成或修正 `HPKBUILD`
+- 但不应在文档里假设 `lycium` 会直接从 `libs/<库名>/` 开始构建
+- `lycium` 当前上游实现还会检查宿主机上的 `cmake/pkg-config/autoconf/automake/ninja` 等命令
+- 这属于 `lycium` 实现约束，不等于所有 HarmonyOS 交叉编译路径的统一前置
 
 ## 第三步：记录 lycium 结果
 
@@ -204,4 +222,3 @@ nm -D outputs/<库名>/*.so | head
 ## 下一步
 
 Phase 5 完成后，不再 STOP，直接进入 [12-delivery-archive.md](./12-delivery-archive.md)。
-

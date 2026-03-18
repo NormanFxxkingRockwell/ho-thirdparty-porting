@@ -12,6 +12,7 @@
 - 默认目标产物是 `.so`。
 - 默认目标架构是 `arm64-v8a`。
 - Phase 5 的编译策略是：`lycium` 优先，失败后分类，再进入原生 fallback。
+- `lycium` 不是直接消费 `libs/<库名>/` 源码目录的工具，它以 `HPKBUILD` recipe 为核心输入。
 
 ## 核心原则
 
@@ -53,6 +54,8 @@
 - Linux 或 WSL 环境可用
 - 已找到 HarmonyOS SDK，或者已要求用户补充 `COMMAND_LINE_TOOLS_ROOT`
 - 已找到 `tpc_c_cplusplus`，或者已尝试自动拉取
+- 已确认基础交叉编译环境可用
+- 已区分 `base-ready` 与 `lycium-ready` 状态
 - 已生成任务模板
 
 完成后动作：
@@ -71,6 +74,10 @@
 - 已克隆或下载目标库源码到 `libs/<库名>/`
 - 已核对版本、分支或 commit
 
+说明：
+- `libs/<库名>/` 是代码分析、业务适配和 fallback 原生构建的主目录。
+- 如果 Phase 5 走 `lycium`，AI 需要把前面阶段的结论转写到 `HPKBUILD` 或对应 recipe 目录，而不是假设 `lycium` 直接使用 `libs/<库名>/`。
+
 ### Phase 3：业务代码适配方案分析
 
 涉及文档：
@@ -83,6 +90,7 @@
 - 本阶段只分析 HarmonyOS 业务代码适配点。
 - 本阶段不输出编译构建方案。
 - 本阶段的目标是识别需要替换的系统接口、平台宏、头文件、平台能力调用等。
+- 本阶段允许附带一段“给 Phase 5 的最小交接摘要”，但这不是完整构建方案。
 
 完成后动作：
 - 清空 Phase 2-3 TODO
@@ -118,6 +126,11 @@
 - 只有适合进入 fallback 时，才生成原生 `build.sh`
 - 编译期间允许根据报错继续修改代码，直到生成 `.so`
 
+说明：
+- 走 `lycium` 时，主输入是 `pkgname + HPKBUILD`。
+- `lycium` 的宿主机前置只在进入 `lycium` 前检查，不应回溯为整个 Phase 1 的统一硬门槛。
+- 走 fallback 时，主输入是 `libs/<库名>/` 中的源码和 AI 生成的 `build.sh`。
+
 ### Phase 6：交付与归档
 
 涉及文档：
@@ -148,6 +161,7 @@
 说明：
 - `run-lycium-build.sh` 是模板脚本。
 - AI 应复制出按库名命名的脚本，例如 `scripts/run-lycium-build-zlib.sh`，填写后再执行。
+- 该脚本应以 `pkgname/HPKBUILD` 为中心，不应把 `SOURCE_DIR` 作为默认必填主输入。
 
 ## AI 执行检查清单
 
@@ -157,4 +171,3 @@
 - [ ] Phase 5 是否遵循 `lycium -> 失败分类 -> fallback -> 边编译边修 -> 产出 .so`
 - [ ] Phase 5 完成后是否直接进入交付
 - [ ] 是否避免写死机器绝对路径
-
