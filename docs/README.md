@@ -175,6 +175,7 @@
 - `scripts/read-task-sheet.sh`
 - `scripts/init-report-templates.sh`
 - `scripts/init-batch-report.sh`
+- `scripts/update-batch-status.sh`
 - `scripts/run-lycium-build.sh`
 - `scripts/init-build-script.sh`
 - `scripts/init-test-driver.sh`

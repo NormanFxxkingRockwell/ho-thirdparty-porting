@@ -41,6 +41,12 @@
 - 同时更新 `reports/batch-YYYY-MM-DD.md`
 - 单个库失败不阻塞整个批次，但必须明确失败阶段和原因
 
+推荐执行：
+
+```bash
+bash scripts/update-batch-status.sh --lib-name <库名> --adaptation-status pass --build-status pass --test-status pass --note "..."
+```
+
 ## 完成标准
 
 - [ ] `.so` 产物已整理

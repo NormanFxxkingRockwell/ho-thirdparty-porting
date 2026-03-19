@@ -30,15 +30,43 @@
 
 ```text
 lycium 优先
+-> recipe 配套校验
+-> 清理当前库旧构建状态
 -> 失败分类
 -> 适合则 fallback
 -> 边编译边修
 -> 产出 .so
--> 优先复用 test program
--> 必要时生成 minimal test driver
+-> install binary
+-> build 目录里的上游 test program
+-> minimal test driver
 -> mcp 设备测试
 -> 失败则 hdc fallback
 ```
+
+## lycium 执行前的固定检查
+
+进入 `lycium` 前至少检查：
+- `HPKBUILD`
+- `SHA512SUM`
+- `packagename`
+- 实际下载包名
+- `builddir`
+
+要求：
+- `SHA512SUM` 中记录的包名必须与 `packagename` 一致
+- 下载链接最终包名必须与 `packagename` 一致
+- `builddir` 不能为空
+
+## lycium 执行前的固定清理
+
+每次当前库开始构建前，都要把“历史构建状态”和“本轮构建状态”切开：
+- 清掉 `lycium/usr/hpk_build.csv` 中当前库的历史记录
+- 清掉 `lycium/usr/<pkgname>/` 下当前库旧产物
+- 必要时清掉 recipe 目录下当前库旧的 `builddir`
+
+说明：
+- 这样做是为了避免 `lycium` 误以为“之前编过 = 这次也算编过”
+- 本轮构建结束后，再以当前真实产物作为唯一依据
 
 ## 中量级库的额外检查
 
@@ -52,13 +80,17 @@ lycium 优先
 - 先做最小升级，再尝试 `lycium`
 - 不要直接因为“仓库里有 HPKBUILD”就盲目开编
 
-## binary 生成策略
+## binary 收集规则
 
-优先级固定如下：
+binary 收集优先级固定如下：
 
-1. 上游已有 test program / example / CLI
-2. 上游已有可复用测试入口
-3. 生成最小测试驱动
+1. install 产物中的 binary
+2. 构建目录里的上游 test program / example / CLI
+3. 最小测试驱动
+
+说明：
+- 如果 install 产物中没有 binary，但构建目录里已经生成上游 test program，不应直接判定 `binary-pass` 失败
+- 应优先从构建目录回收该 binary 到 `outputs/<库名>/bin/`
 
 若没有现成入口，可执行：
 
@@ -107,6 +139,7 @@ hdc shell /data/local/tmp/<库名>/<binary> [args...]
 - `binary-pass`
 - `device-pass`
 - binary 来源类型是 `test program` 还是 `minimal test driver`
+- binary 是来自 install 目录还是构建目录
 - 设备测试通道是 `harmonyos-dev-mcp` 还是 `hdc fallback`
 - 执行命令
 - 设备侧执行结果
@@ -119,6 +152,7 @@ hdc shell /data/local/tmp/<库名>/<binary> [args...]
 - [ ] `.so` 已放入 `outputs/<库名>/lib/`
 - [ ] 若存在 binary，已放入 `outputs/<库名>/bin/`
 - [ ] build report 中已明确 binary 来源类型
+- [ ] build report 中已明确 binary 收集来源
 - [ ] build report 中已明确设备测试通道
 - [ ] 结论以 `arm64-v8a` 产物为准，其他架构仅作附带结果
 - [ ] 未发现新的 `.rej` 文件
