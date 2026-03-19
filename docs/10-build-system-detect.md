@@ -12,8 +12,8 @@
 ## 输入
 
 - `libs/<库名>/`
-- `reports/<库名>-adaptation-report.md`
-- `reports/<库名>-adaptation-plan.md` 中的 Phase 5 最小交接摘要
+- `reports/<库名>/adaptation-report.md`
+- `reports/<库名>/adaptation-plan.md` 中的 Phase 5 最小交接摘要
 
 ## 输出
 

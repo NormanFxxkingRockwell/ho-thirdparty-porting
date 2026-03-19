@@ -7,7 +7,7 @@
 - 额外整理后续测试入口和建议
 
 输出物：
-- `reports/<库名>-adaptation-plan.md`
+- `reports/<库名>/adaptation-plan.md`
 
 ## 必须覆盖的内容
 
@@ -53,9 +53,26 @@
 - 这里不是完整构建方案
 - 这里只是避免 Phase 5 重新摸底
 
+## 多库模式下的审批规则
+
+如果该库的 `是否需要用户审批方案=否`：
+- Phase 3 完成后不进入 STOP 2
+- 可直接继续进入 Phase 4
+- 同时应将任务表中的 `审批结果` 写成 `不需要审批`
+
+如果该库的 `是否需要用户审批方案=是` 或留空：
+- Phase 3 完成后将 `审批结果` 写成 `待审批`
+- 输出 `reports/<库名>/adaptation-plan.md`
+- 等待用户后续集中审批
+
+如果用户将 `审批结果` 设为 `不通过`：
+- 该库回到 Phase 3
+- 重写或更新 `reports/<库名>/adaptation-plan.md`
+- 再次等待审批
+
 ## STOP 2 前的要求
 
-- 必须生成 `reports/<库名>-adaptation-plan.md`
+- 必须生成 `reports/<库名>/adaptation-plan.md`
 - 必须明确是否存在可复用 test program
 - 必须明确若无 test program 时，是否允许最小测试驱动
-- 到达 STOP 2 后，只等待用户批准方案，不得自行进入 Phase 4
+- 对需要审批的库，到达 STOP 2 后只等待用户审批，不得自行进入 Phase 4

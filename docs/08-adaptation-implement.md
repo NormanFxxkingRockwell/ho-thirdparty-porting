@@ -6,7 +6,7 @@
 
 ## 输入
 
-- `reports/<库名>-adaptation-plan.md`
+- `reports/<库名>/adaptation-plan.md`
 - 用户已明确批准方案
 - `libs/<库名>/`
 
@@ -51,4 +51,3 @@
 
 随后进入：
 - [10-build-system-detect.md](./10-build-system-detect.md)
-

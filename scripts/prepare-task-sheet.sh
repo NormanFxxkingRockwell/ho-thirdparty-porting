@@ -18,9 +18,10 @@ fail() {
 
 if [[ -e "$TARGET_FILE" ]]; then
   echo "Task sheet already exists: $TARGET_FILE"
-  exit 0
+else
+  cp "$TEMPLATE_FILE" "$TARGET_FILE"
+  echo "Created task sheet: $TARGET_FILE"
 fi
 
-cp "$TEMPLATE_FILE" "$TARGET_FILE"
-echo "Created task sheet: $TARGET_FILE"
-echo "Fill it in and continue with Phase 2."
+bash "$SCRIPT_DIR/init-batch-report.sh" --date "$DATE_STAMP"
+echo "Fill the task sheet and continue with Phase 2."

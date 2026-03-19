@@ -6,10 +6,10 @@ usage() {
   cat <<EOF
 Usage: bash scripts/init-report-templates.sh --lib-name <name> [--force]
 
-Creates these report skeletons under reports/:
-  - <lib>-adaptation-plan.md
-  - <lib>-adaptation-report.md
-  - <lib>-build-report.md
+Creates these report skeletons under reports/<lib>/:
+  - adaptation-plan.md
+  - adaptation-report.md
+  - build-report.md
 EOF
 }
 
@@ -61,11 +61,12 @@ done
 
 [[ -n "$LIB_NAME" ]] || { usage; fail "--lib-name is required."; }
 
-mkdir -p "$REPORTS_DIR"
+LIB_REPORT_DIR="$REPORTS_DIR/$LIB_NAME"
+mkdir -p "$LIB_REPORT_DIR"
 
-ADAPTATION_PLAN_FILE="$REPORTS_DIR/$LIB_NAME-adaptation-plan.md"
-ADAPTATION_REPORT_FILE="$REPORTS_DIR/$LIB_NAME-adaptation-report.md"
-BUILD_REPORT_FILE="$REPORTS_DIR/$LIB_NAME-build-report.md"
+ADAPTATION_PLAN_FILE="$LIB_REPORT_DIR/adaptation-plan.md"
+ADAPTATION_REPORT_FILE="$LIB_REPORT_DIR/adaptation-report.md"
+BUILD_REPORT_FILE="$LIB_REPORT_DIR/build-report.md"
 
 ADAPTATION_PLAN_CONTENT=$(cat <<EOF
 # $LIB_NAME 业务代码适配方案
@@ -111,7 +112,7 @@ ADAPTATION_REPORT_CONTENT=$(cat <<EOF
 
 ## 1. 输入方案
 
-- 输入方案文件：\`reports/$LIB_NAME-adaptation-plan.md\`
+- 输入方案文件：\`reports/$LIB_NAME/adaptation-plan.md\`
 
 ## 2. 已实施修改
 

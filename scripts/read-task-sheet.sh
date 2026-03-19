@@ -22,6 +22,8 @@ Behavior:
   - Only accepts dated task sheets matching porting-tasks-YYYY-MM-DD.xlsx
   - Rejects the template file porting-tasks-模板.xlsx
   - Outputs only valid rows containing at least lib_name + repo_url
+  - Sorts rows as: approval_required=否 first, then 是/空
+  - Preserves original sheet order inside each group
 EOF
 }
 
@@ -111,6 +113,7 @@ main() {
 
   python3 - "$TASK_FILE" "$OUTPUT_FORMAT" <<'PY'
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -119,16 +122,34 @@ from openpyxl import load_workbook
 task_file = Path(sys.argv[1])
 output_format = sys.argv[2]
 
+
+def normalize_header(text: str) -> str:
+    value = (text or "").strip().lower()
+    value = value.replace(" ", "")
+    value = value.replace("（", "(").replace("）", ")")
+    value = re.sub(r"\(.*?\)", "", value)
+    return value
+
+
 header_alias = {
     "库名": "lib_name",
     "git仓库": "repo_url",
     "版本": "version",
-    "状态": "status",
+    "是否需要用户审批方案": "approval_required",
+    "审批结果": "approval_result",
+    "适配状态": "adaptation_status",
+    "编译状态": "build_status",
+    "测试状态": "test_status",
+    "失败原因/备注": "note",
     "备注": "note",
     "lib_name": "lib_name",
     "repourl": "repo_url",
     "version": "version",
-    "status": "status",
+    "approval_required": "approval_required",
+    "approval_result": "approval_result",
+    "adaptation_status": "adaptation_status",
+    "build_status": "build_status",
+    "test_status": "test_status",
     "note": "note",
 }
 
@@ -142,27 +163,52 @@ if not rows:
 raw_header = [("" if c is None else str(c).strip()) for c in rows[0]]
 header = []
 for cell in raw_header:
-    normalized = cell.replace(" ", "").strip().lower()
-    key = header_alias.get(normalized, "")
+    key = header_alias.get(normalize_header(cell), "")
     header.append(key)
 
 if "lib_name" not in header or "repo_url" not in header:
     raise SystemExit("ERROR: task sheet header must contain 库名 and Git 仓库.")
 
+defaults = {
+    "lib_name": "",
+    "repo_url": "",
+    "version": "",
+    "approval_required": "是",
+    "approval_result": "",
+    "adaptation_status": "待处理",
+    "build_status": "待处理",
+    "test_status": "待处理",
+    "note": "",
+}
+
 valid_rows = []
-for row in rows[1:]:
+for index, row in enumerate(rows[1:], start=2):
     values = [("" if c is None else str(c).strip()) for c in row]
-    item = {"lib_name": "", "repo_url": "", "version": "", "status": "", "note": ""}
+    item = dict(defaults)
     for idx, key in enumerate(header):
-      if key and idx < len(values):
-        item[key] = values[idx]
-    if item["lib_name"] and item["repo_url"]:
-        if not item["status"]:
-            item["status"] = "待处理"
-        valid_rows.append(item)
+        if key and idx < len(values):
+            item[key] = values[idx]
+
+    if not item["lib_name"] or not item["repo_url"]:
+        continue
+
+    if not item["approval_required"]:
+        item["approval_required"] = "是"
+    if item["approval_required"] == "否" and not item["approval_result"]:
+        item["approval_result"] = "不需要审批"
+    elif item["approval_required"] != "否" and not item["approval_result"]:
+        item["approval_result"] = "待审批"
+
+    item["_sheet_row"] = index
+    item["_priority"] = 0 if item["approval_required"] == "否" else 1
+    valid_rows.append(item)
 
 if not valid_rows:
     raise SystemExit("ERROR: no valid task rows found.")
+
+valid_rows.sort(key=lambda x: (x["_priority"], x["_sheet_row"]))
+for item in valid_rows:
+    item.pop("_priority", None)
 
 if output_format == "json":
     print(json.dumps(valid_rows, ensure_ascii=False, indent=2))
@@ -172,7 +218,11 @@ else:
             item["lib_name"],
             item["repo_url"],
             item["version"],
-            item["status"],
+            item["approval_required"],
+            item["approval_result"],
+            item["adaptation_status"],
+            item["build_status"],
+            item["test_status"],
             item["note"],
         ]))
 PY

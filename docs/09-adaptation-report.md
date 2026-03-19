@@ -1,7 +1,7 @@
 # Phase 4-2：业务适配报告
 
 输出物：
-- `reports/<库名>-adaptation-report.md`
+- `reports/<库名>/adaptation-report.md`
 
 目标：
 - 记录 Phase 4 实际实施的业务适配修改
@@ -26,7 +26,7 @@
 ### 1. 区分业务适配修改与编译驱动修改
 
 - 业务适配修改写在本报告中
-- 编译驱动型修改写在 `reports/<库名>-build-report.md`
+- 编译驱动型修改写在 `reports/<库名>/build-report.md`
 
 ### 2. 测试入口与使用建议必须补全
 

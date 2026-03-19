@@ -16,13 +16,13 @@
 
 - `libs/<库名>/`
 - 构建系统识别结果
-- `reports/<库名>-adaptation-report.md`
+- `reports/<库名>/adaptation-report.md`
 
 ## 输出
 
 - `outputs/<库名>/lib/`
 - `outputs/<库名>/bin/`
-- `reports/<库名>-build-report.md`
+- `reports/<库名>/build-report.md`
 - 必要时：`libs/<库名>/build.sh`
 - 必要时：`libs/<库名>/test-driver/`
 
