@@ -40,6 +40,18 @@ lycium 优先
 -> 失败则 hdc fallback
 ```
 
+## 中量级库的额外检查
+
+对 `libxml2`、`curl`、`freetype`、`harfbuzz` 这一档库，进入 `lycium` 前要先做一轮 recipe 漂移检查：
+- 现成 `HPKBUILD` 的版本是否落后于当前任务目标版本
+- 现成依赖是否已经过时，或仅对旧版本有效
+- 现成功能开关是否会把 binary 入口关掉
+- 现成下载源是否仍然可访问
+
+如果发现 recipe 漂移明显：
+- 先做最小升级，再尝试 `lycium`
+- 不要直接因为“仓库里有 HPKBUILD”就盲目开编
+
 ## binary 生成策略
 
 优先级固定如下：
@@ -72,7 +84,13 @@ bash scripts/init-test-driver.sh --lib-name <库名> --language cpp
 - 真实推送到设备
 - 真实执行
 - 记录实际使用的是 `harmonyos-dev-mcp` 还是 `hdc fallback`
-- 记录返回码和关键输出
+- 记录设备侧执行结果
+
+设备侧结果记录规则：
+- 优先记录明确的数字返回码
+- 如果执行环境只能给出布尔结果或成功/失败标记，也允许记录
+- 同时必须记录关键输出，避免只写一个 `True` 或 `False`
+- 如果命令无报错且关键输出符合预期，可判定 device-pass 成功
 
 典型 `hdc` fallback 动作：
 
@@ -91,7 +109,7 @@ hdc shell /data/local/tmp/<库名>/<binary> [args...]
 - binary 来源类型是 `test program` 还是 `minimal test driver`
 - 设备测试通道是 `harmonyos-dev-mcp` 还是 `hdc fallback`
 - 执行命令
-- 返回码
+- 设备侧执行结果
 - 关键输出
 
 ## 完成标准
@@ -102,5 +120,6 @@ hdc shell /data/local/tmp/<库名>/<binary> [args...]
 - [ ] 若存在 binary，已放入 `outputs/<库名>/bin/`
 - [ ] build report 中已明确 binary 来源类型
 - [ ] build report 中已明确设备测试通道
+- [ ] 结论以 `arm64-v8a` 产物为准，其他架构仅作附带结果
 - [ ] 未发现新的 `.rej` 文件
 - [ ] 关键日志未出现未处理失败信号
