@@ -30,7 +30,7 @@
 - `Phase 2`：读取任务并获取源码
 - `Phase 3`：输出 HarmonyOS 业务代码适配方案报告
 - `Phase 4`：实施业务代码适配方案，并生成业务适配报告
-- `Phase 5`：构建编译，允许边编译边修代码，直到产出 `.so`，并尽量补出测试 binary
+- `Phase 5`：构建编译，允许边编译边修代码，直到产出 `.so`，并在存在现成测试入口时补出测试 binary
 - `Phase 6`：交付、归档与测试结果汇总
 
 ### 2. STOP 点
@@ -137,7 +137,6 @@
 - `outputs/<库名>/bin/`
 - `reports/<库名>/build-report.md`
 - 必要时生成 `libs/<库名>/build.sh`
-- 必要时生成 `libs/<库名>/test-driver/`
 
 策略：
 - `lycium` 是主构建流程，优先级高于 fallback
@@ -146,7 +145,7 @@
 - `lycium` 失败后必须先分类，不能因为配置项没开对、版本不一致或依赖不一致就直接 fallback
 - 进入 fallback 前也必须先做原生构建方案预检查与预修正，再执行实际构建
 - 编译期间允许根据报错继续修改代码
-- 优先复用上游 test program / example / CLI；若没有现成测试入口，则明确记录“无测试用例”
+- 优先复用上游 test program；若没有合适的 test program，再使用上游 CLI 做真实能力校验；若仍无现成测试入口，则明确记录“无测试用例”
 - 设备测试时默认优先调用 `harmonyos-dev-mcp`，失败再 fallback 到 `hdc`
 
 ### Phase 6：交付与归档
@@ -183,7 +182,6 @@
 - `scripts/update-batch-status.sh`
 - `scripts/run-lycium-build.sh`
 - `scripts/init-build-script.sh`
-- `scripts/init-test-driver.sh`
 
 ## AI 执行检查清单
 
@@ -191,7 +189,7 @@
 - [ ] 是否只在 Phase 1 做环境检查
 - [ ] Phase 3 是否只产出业务代码适配方案
 - [ ] Phase 5 是否遵循 `lycium预检查/预修正 -> lycium执行 -> 失败分类 -> fallback预检查/预修正 -> fallback执行 -> 边编译边修 -> 产出.so`
-- [ ] Phase 5 是否优先尝试复用上游 test program
+- [ ] Phase 5 是否遵循“`test program` 优先，其次 `CLI` 能力校验，最后才是 `无测试用例`”的顺序
 - [ ] 若无现成测试入口，是否已在 build report 中明确记录“无测试用例”
 - [ ] 设备测试阶段是否默认优先调用 `harmonyos-dev-mcp`
 - [ ] 多库时是否遵守“先否后是、组内串行”的规则

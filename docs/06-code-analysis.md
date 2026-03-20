@@ -35,7 +35,8 @@
 本节是给后续测试 phase 直接使用的，不可省略。
 
 至少整理：
-- 上游已有的 test program / example / CLI
+- 上游已有的 test program
+- 若无合适 test program，上游可复用的 CLI
 - 推荐优先使用的运行命令
 - 样例输入、参数或测试数据
 - 若无现成入口，明确记录“无测试用例”
@@ -73,6 +74,6 @@
 ## STOP 2 前的要求
 
 - 必须生成 `reports/<库名>/adaptation-plan.md`
-- 必须明确是否存在可复用 test program
+- 必须明确是否存在可复用 test program，以及若无 test program 时是否存在可复用 CLI
 - 必须明确若无 test program 时，当前库是否无现成测试用例
 - 对需要审批的库，到达 STOP 2 后只等待用户审批，不得自行进入 Phase 4

@@ -75,7 +75,7 @@ find "$INSTALL_DIR/bin" -maxdepth 1 -type f -perm -111 -exec cp -f {} "$BIN_OUTP
 echo "Fallback build finished."
 echo "Library artifacts: $LIB_OUTPUT_DIR"
 echo "Binary artifacts: $BIN_OUTPUT_DIR"
-echo "If no upstream binary exists, generate a minimal test driver with scripts/init-test-driver.sh."
+echo "Prefer upstream test program first; if unavailable, use upstream CLI for real capability validation."
 EOF
 )
     ;;
@@ -112,7 +112,7 @@ find "$PROJECT_DIR/install/bin" -maxdepth 1 -type f -perm -111 -exec cp -f {} "$
 echo "Fallback build finished."
 echo "Library artifacts: $LIB_OUTPUT_DIR"
 echo "Binary artifacts: $BIN_OUTPUT_DIR"
-echo "If no upstream binary exists, generate a minimal test driver with scripts/init-test-driver.sh."
+echo "Prefer upstream test program first; if unavailable, use upstream CLI for real capability validation."
 EOF
 )
     ;;
@@ -144,7 +144,7 @@ find "$PROJECT_DIR" -maxdepth 2 -type f -perm -111 ! -name '*.so*' -exec cp -f {
 echo "Fallback build finished."
 echo "Library artifacts: $LIB_OUTPUT_DIR"
 echo "Binary artifacts: $BIN_OUTPUT_DIR"
-echo "If no upstream binary exists, generate a minimal test driver with scripts/init-test-driver.sh."
+echo "Prefer upstream test program first; if unavailable, use upstream CLI for real capability validation."
 EOF
 )
     ;;

@@ -41,8 +41,9 @@ lycium 优先
 -> 执行 fallback
 -> 边编译边修
 -> 产出 .so
--> install binary
+-> install 产物中的上游 test program
 -> build 目录里的上游 test program
+-> 上游 CLI 能力校验
 -> 若无现成测试入口则记录“无测试用例”
 -> mcp 设备测试
 -> 失败则 hdc fallback
@@ -56,7 +57,8 @@ lycium 优先
 - `packagename`
 - 实际下载包名
 - `builddir`
-- 上游是否存在可复用的 `test program / example / CLI`
+- 上游是否存在可复用的 `test program`
+- 若无合适 `test program`，是否存在可复用的 `CLI`
 - recipe 是否把 tests/examples/binary 关闭
 - recipe 是否具备 install binary 或后续收集逻辑
 
@@ -111,7 +113,8 @@ lycium 优先
 
 进入 fallback 前，不允许直接生成 `build.sh` 开始尝试，必须先检查：
 - 上游真实构建系统与共享库开关
-- 上游是否存在 test program / example / CLI
+- 上游是否存在 test program
+- 若无合适 test program，是否存在 CLI
 - 测试程序是否依赖资源文件
 - 需要关闭哪些 feature，保留哪些 binary
 - install 路径、binary 收集路径和设备测试路径
@@ -128,13 +131,16 @@ lycium 优先
 
 binary 收集优先级固定如下：
 
-1. install 产物中的 binary
-2. 构建目录里的上游 test program / example / CLI
+1. install 产物中的上游 test program
+2. 构建目录里的上游 test program
+3. 上游 CLI
 
 说明：
 - 如果 install 产物中没有 binary，但构建目录里已经生成上游 test program，不应直接判定 `binary-pass` 失败
 - 应优先从构建目录回收该 binary 到 `outputs/<库名>/bin/`
-- 如果上游没有现成 test program / example / CLI，则不再生成最小测试驱动，直接在报告中记录“无测试用例”
+- 如果 test program 不适合设备侧运行，但上游存在 CLI，则应优先使用 CLI 做真实能力校验，不能只跑 `--version` / `-V`
+- CLI 能力校验必须至少覆盖一条真实功能路径，例如压缩/解压回环、解析/转换、输入输出处理等
+- 如果上游没有现成 test program 或 CLI，则不再生成最小测试驱动，直接在报告中记录“无测试用例”
 
 ## 设备测试
 
@@ -170,7 +176,7 @@ hdc shell /data/local/tmp/<库名>/<binary> [args...]
 - `build-pass`
 - `binary-pass`
 - `device-pass`
-- binary 来源类型是 `test program` / `example` / `CLI`，或明确记录“无测试用例”
+- binary 来源类型是 `test program` / `CLI`，或明确记录“无测试用例”
 - binary 是来自 install 目录还是构建目录
 - 设备测试通道是 `harmonyos-dev-mcp` 还是 `hdc fallback`
 - 执行命令

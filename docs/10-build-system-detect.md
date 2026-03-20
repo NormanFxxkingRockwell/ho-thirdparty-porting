@@ -57,7 +57,8 @@ AI 必须先判断：
 - `HPKBUILD` 版本是否匹配当前任务目标版本
 - `SHA512SUM` 是否与当前下载包一致
 - `packagename`、下载包名、`builddir` 是否一致
-- 上游是否存在可复用的 `test program / example / CLI`
+- 上游是否存在可复用的 `test program`
+- 若无合适 `test program`，是否存在可复用的 `CLI`
 - recipe 是否把这些目标关掉
 - recipe 是否缺少 install binary 或 binary 收集逻辑
 

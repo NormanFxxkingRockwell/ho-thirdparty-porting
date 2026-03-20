@@ -28,7 +28,7 @@
 - `.so` 是否已完成
 - binary 是否已完成
 - 设备测试是否已完成
-- binary 来源是 `test program` / `example` / `CLI`，或明确记录“无测试用例”
+- binary 来源是 `test program` / `CLI`，或明确记录“无测试用例”
 - 设备测试通道是 `harmonyos-dev-mcp` 还是 `hdc fallback`
 
 ## 多库模式下的额外要求
