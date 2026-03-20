@@ -57,8 +57,9 @@ AI 必须先判断：
 - `HPKBUILD` 版本是否匹配当前任务目标版本
 - `SHA512SUM` 是否与当前下载包一致
 - `packagename`、下载包名、`builddir` 是否一致
-- 上游是否存在可复用的 `test program`
-- 若无合适 `test program`，是否存在可复用的 `CLI`
+- 上游是否存在自带、可独立运行的测试入口
+- 该测试入口可能位于 `test/`、`tests/`、`testing/`、`example/`、`examples/`、`sample/`、`samples/`、`tools/`、`programs/` 或其他自定义目录
+- 若无合适测试入口，是否存在可复用的 `CLI`
 - recipe 是否把这些目标关掉
 - recipe 是否缺少 install binary 或 binary 收集逻辑
 
@@ -161,7 +162,7 @@ AI 必须先判断：
 
 ## 第六步：fallback 预检查与预修正
 
-进入 fallback 前，不允许直接写 `build.sh` 开始编，必须先完成原生构建方案预检查：
+进入 fallback 前，不允许直接写 `build.sh` 开始编；进入 fallback 前，不允许直接写 build.sh 开始编，必须先完成原生构建方案预检查：
 - 上游真实构建系统是什么
 - 是否存在共享库开关
 - 是否存在可执行测试入口
