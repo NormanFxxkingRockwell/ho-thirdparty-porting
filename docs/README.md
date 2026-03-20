@@ -140,9 +140,11 @@
 - 必要时生成 `libs/<库名>/test-driver/`
 
 策略：
-- 先尝试 `lycium`
-- `lycium` 失败后分类
-- 合适时进入 fallback
+- `lycium` 是主构建流程，优先级高于 fallback
+- `lycium` 先做 recipe 预检查与预修正，再执行实际构建
+- 发现同库或近似库的现成 recipe 后，优先复制、升级并修正，不允许仅因版本或依赖不一致直接 fallback
+- `lycium` 失败后必须先分类，不能因为配置项没开对、版本不一致或依赖不一致就直接 fallback
+- 进入 fallback 前也必须先做原生构建方案预检查与预修正，再执行实际构建
 - 编译期间允许根据报错继续修改代码
 - 优先复用上游 test program；若没有，再生成最小测试驱动
 - 设备测试时默认优先调用 `harmonyos-dev-mcp`，失败再 fallback 到 `hdc`
@@ -188,7 +190,7 @@
 - [ ] 当前阶段职责是否正确
 - [ ] 是否只在 Phase 1 做环境检查
 - [ ] Phase 3 是否只产出业务代码适配方案
-- [ ] Phase 5 是否遵循 `lycium -> 失败分类 -> fallback -> 边编译边修 -> 产出 .so`
+- [ ] Phase 5 是否遵循 `lycium预检查/预修正 -> lycium执行 -> 失败分类 -> fallback预检查/预修正 -> fallback执行 -> 边编译边修 -> 产出.so`
 - [ ] Phase 5 是否优先尝试复用上游 test program
 - [ ] 若生成最小测试驱动，是否在 build report 中明确标记 `minimal test driver`
 - [ ] 设备测试阶段是否默认优先调用 `harmonyos-dev-mcp`

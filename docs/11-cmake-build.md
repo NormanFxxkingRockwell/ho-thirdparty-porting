@@ -6,8 +6,10 @@
 
 目标：
 - 优先使用 `lycium`
-- 失败后分类
+- `lycium` 是主构建流程，只有在证明不可行时才允许 fallback
+- `lycium` 先预检查、预修正，再执行
 - 合适时进入 fallback
+- fallback 也先预检查、预修正，再执行
 - 允许边编译边修代码，直到产出 `.so`
 - 尽量同时产出测试 binary
 - 设备测试阶段默认优先调用 `harmonyos-dev-mcp`，失败再 fallback 到 `hdc`
@@ -30,10 +32,14 @@
 
 ```text
 lycium 优先
--> recipe 配套校验
+-> recipe 预检查
+-> recipe 预修正
 -> 清理当前库旧构建状态
+-> 执行 lycium
 -> 失败分类
--> 适合则 fallback
+-> fallback 预检查
+-> fallback 预修正
+-> 执行 fallback
 -> 边编译边修
 -> 产出 .so
 -> install binary
@@ -51,11 +57,33 @@ lycium 优先
 - `packagename`
 - 实际下载包名
 - `builddir`
+- 上游是否存在可复用的 `test program / example / CLI`
+- recipe 是否把 tests/examples/binary 关闭
+- recipe 是否具备 install binary 或后续收集逻辑
 
 要求：
 - `SHA512SUM` 中记录的包名必须与 `packagename` 一致
 - 下载链接最终包名必须与 `packagename` 一致
 - `builddir` 不能为空
+
+硬规则：
+- 如果上游存在可复用 binary，而 recipe 只是默认关闭相关构建选项，优先修 recipe 配置项
+- 不允许仅因为当前 recipe 默认没带出 binary 就直接进入 fallback
+- 不允许仅因为现成 recipe 的版本、依赖、包名、`SHA512SUM` 或 `builddir` 与目标不一致就直接进入 fallback
+- 发现同库或近似库的现成 recipe 后，优先复制、升级、依赖修正和开关修正，再执行 `lycium`
+
+## lycium 执行前的固定预修正
+
+预检查发现问题后，优先在执行前修正：
+- 修正 `HPKBUILD`
+- 修正 `SHA512SUM`
+- 修正 `packagename`、下载包名、`builddir`
+- 基于旧 recipe 升级到目标版本
+- 基于当前版本修正依赖关系
+- 打开上游 binary 目标相关构建选项
+- 补齐 binary install 或收集逻辑
+
+只有完成预修正后，才进入实际 `lycium` 构建。
 
 ## lycium 执行前的固定清理
 
@@ -79,6 +107,23 @@ lycium 优先
 如果发现 recipe 漂移明显：
 - 先做最小升级，再尝试 `lycium`
 - 不要直接因为“仓库里有 HPKBUILD”就盲目开编
+
+## fallback 执行前的固定检查与预修正
+
+进入 fallback 前，不允许直接生成 `build.sh` 开始尝试，必须先检查：
+- 上游真实构建系统与共享库开关
+- 上游是否存在 test program / example / CLI
+- 测试程序是否依赖资源文件
+- 需要关闭哪些 feature，保留哪些 binary
+- install 路径、binary 收集路径和设备测试路径
+
+预检查后优先修正：
+- 原生构建参数
+- feature 开关
+- binary 收集路径
+- 必要的最小 install/拷贝逻辑
+
+只有完成这些预修正后，才执行 fallback 构建。
 
 ## binary 收集规则
 

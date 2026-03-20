@@ -2,6 +2,8 @@
 
 目标：
 - 识别目标库的构建系统
+- 先完成 `lycium` 的 recipe 预检查与预修正
+- 若需要 fallback，再先完成原生构建方案预检查与预修正
 - 确定本库进入 `lycium` 还是 fallback 的决策路径
 
 注意：
@@ -18,8 +20,11 @@
 ## 输出
 
 - 构建系统识别结果
-- `lycium` 尝试方案
+- `lycium` recipe 预检查结果
+- `lycium` 预修正项
 - fallback 触发条件
+- fallback 构建方案预检查结果
+- fallback 预修正项
 
 ## 第一步：识别构建系统
 
@@ -31,7 +36,7 @@
 4. `BUILD.gn` / `.gn` -> `gn`
 5. 其他 -> `unknown`
 
-## 第二步：判断 `lycium` 起点
+## 第二步：判断 `lycium` 起点并做 recipe 预检查
 
 AI 必须先判断：
 
@@ -44,8 +49,25 @@ AI 必须先判断：
 说明：
 - 这里的 `<库名>` 不一定与 `libs/<库名>/` 完全同名
 - 允许 AI 根据已有 recipe 名称、上游项目名、pkgname 做映射判断
+- 只要找到了同库或近似库的现成 recipe，就应优先把它视为升级与修正的起点，而不是直接放弃 `lycium`
 
-### 2. 若无现成 HPKBUILD，是否适合新建
+### 2. 若有现成 HPKBUILD，必须先做 recipe 预检查
+
+进入实际 `lycium` 构建前，至少检查：
+- `HPKBUILD` 版本是否匹配当前任务目标版本
+- `SHA512SUM` 是否与当前下载包一致
+- `packagename`、下载包名、`builddir` 是否一致
+- 上游是否存在可复用的 `test program / example / CLI`
+- recipe 是否把这些目标关掉
+- recipe 是否缺少 install binary 或 binary 收集逻辑
+
+硬规则：
+- 如果上游本来有可复用 binary，但 recipe 只是把相关选项关掉，优先修 recipe 配置项
+- 不允许仅因为当前 recipe 默认关闭 tests/examples/binary 就直接进入 fallback
+- 不允许仅因为现成 recipe 的版本、依赖、包名或 `builddir` 与目标任务不一致，就直接进入 fallback
+- 对同库或近似库的现成 recipe，应优先执行复制、升级、依赖修正和开关修正
+
+### 3. 若无现成 HPKBUILD，是否适合新建
 
 适合新建的典型条件：
 - 构建系统明确
@@ -53,12 +75,23 @@ AI 必须先判断：
 - 依赖不复杂
 - 目标为标准 `.so`
 
-### 3. 若源码依赖极复杂或构建方式高度定制
+### 4. 若源码依赖极复杂或构建方式高度定制
 
 - 可先尝试一次 `lycium`
 - 但应提前标注 fallback 风险高
 
-## 第三步：定义失败分类
+## 第三步：执行前的 recipe 预修正
+
+如果预检查发现问题，优先在执行前修正，例如：
+- 补齐或升级 `HPKBUILD`
+- 修正 `SHA512SUM`
+- 修正 `packagename`、下载包名、`builddir`
+- 打开上游已有 binary 目标需要的构建选项
+- 补齐 binary install 或后续收集路径
+
+只有完成预修正后，才进入实际 `lycium` 执行。
+
+## 第四步：定义失败分类
 
 `lycium` 失败后，不允许直接无脑 fallback，必须先分类：
 
@@ -113,13 +146,29 @@ AI 必须先判断：
 处理：
 - 进入 fallback
 
-## 第四步：fallback 触发条件
+## 第五步：fallback 触发条件
 
 满足任一条件时进入 fallback：
 - `lycium` 两轮内仍无法完成
 - 失败明确属于构建系统 / 工具链能力不足
 - 需要定制原生构建命令
 - 使用 `build.sh` 的成本明显低于继续修 HPKBUILD
+
+说明：
+- 如果问题只是 recipe 配置项、install 逻辑或 binary 收集逻辑不完整，不应直接触发 fallback
+- 如果问题只是旧 recipe 与当前目标版本、依赖或包名不一致，也不应直接触发 fallback，应先完成一轮合理的 recipe 升级与修正
+
+## 第六步：fallback 预检查与预修正
+
+进入 fallback 前，不允许直接写 `build.sh` 开始编，必须先完成原生构建方案预检查：
+- 上游真实构建系统是什么
+- 是否存在共享库开关
+- 是否存在可执行测试入口
+- 测试程序是否依赖额外资源文件
+- 哪些 feature 应关闭，哪些 binary 应保留
+- install 路径和收集路径如何设计
+
+若发现问题，优先先修正构建参数、开关和收集路径，再生成 `build.sh`。
 
 ## fallback 产物
 
