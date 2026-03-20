@@ -26,7 +26,6 @@
 - `outputs/<库名>/bin/`
 - `reports/<库名>/build-report.md`
 - 必要时：`libs/<库名>/build.sh`
-- 必要时：`libs/<库名>/test-driver/`
 
 ## 标准主路径
 
@@ -44,7 +43,7 @@ lycium 优先
 -> 产出 .so
 -> install binary
 -> build 目录里的上游 test program
--> minimal test driver
+-> 若无现成测试入口则记录“无测试用例”
 -> mcp 设备测试
 -> 失败则 hdc fallback
 ```
@@ -131,23 +130,11 @@ binary 收集优先级固定如下：
 
 1. install 产物中的 binary
 2. 构建目录里的上游 test program / example / CLI
-3. 最小测试驱动
 
 说明：
 - 如果 install 产物中没有 binary，但构建目录里已经生成上游 test program，不应直接判定 `binary-pass` 失败
 - 应优先从构建目录回收该 binary 到 `outputs/<库名>/bin/`
-
-若没有现成入口，可执行：
-
-```bash
-bash scripts/init-test-driver.sh --lib-name <库名> --language c
-```
-
-或：
-
-```bash
-bash scripts/init-test-driver.sh --lib-name <库名> --language cpp
-```
+- 如果上游没有现成 test program / example / CLI，则不再生成最小测试驱动，直接在报告中记录“无测试用例”
 
 ## 设备测试
 
@@ -183,7 +170,7 @@ hdc shell /data/local/tmp/<库名>/<binary> [args...]
 - `build-pass`
 - `binary-pass`
 - `device-pass`
-- binary 来源类型是 `test program` 还是 `minimal test driver`
+- binary 来源类型是 `test program` / `example` / `CLI`，或明确记录“无测试用例”
 - binary 是来自 install 目录还是构建目录
 - 设备测试通道是 `harmonyos-dev-mcp` 还是 `hdc fallback`
 - 执行命令
@@ -198,6 +185,7 @@ hdc shell /data/local/tmp/<库名>/<binary> [args...]
 - [ ] 若存在 binary，已放入 `outputs/<库名>/bin/`
 - [ ] build report 中已明确 binary 来源类型
 - [ ] build report 中已明确 binary 收集来源
+- [ ] 若无现成测试入口，build report 中已明确记录“无测试用例”
 - [ ] build report 中已明确设备测试通道
 - [ ] 结论以 `arm64-v8a` 产物为准，其他架构仅作附带结果
 - [ ] 未发现新的 `.rej` 文件

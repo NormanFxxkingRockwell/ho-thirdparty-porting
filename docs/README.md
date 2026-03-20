@@ -146,7 +146,7 @@
 - `lycium` 失败后必须先分类，不能因为配置项没开对、版本不一致或依赖不一致就直接 fallback
 - 进入 fallback 前也必须先做原生构建方案预检查与预修正，再执行实际构建
 - 编译期间允许根据报错继续修改代码
-- 优先复用上游 test program；若没有，再生成最小测试驱动
+- 优先复用上游 test program / example / CLI；若没有现成测试入口，则明确记录“无测试用例”
 - 设备测试时默认优先调用 `harmonyos-dev-mcp`，失败再 fallback 到 `hdc`
 
 ### Phase 6：交付与归档
@@ -192,7 +192,7 @@
 - [ ] Phase 3 是否只产出业务代码适配方案
 - [ ] Phase 5 是否遵循 `lycium预检查/预修正 -> lycium执行 -> 失败分类 -> fallback预检查/预修正 -> fallback执行 -> 边编译边修 -> 产出.so`
 - [ ] Phase 5 是否优先尝试复用上游 test program
-- [ ] 若生成最小测试驱动，是否在 build report 中明确标记 `minimal test driver`
+- [ ] 若无现成测试入口，是否已在 build report 中明确记录“无测试用例”
 - [ ] 设备测试阶段是否默认优先调用 `harmonyos-dev-mcp`
 - [ ] 多库时是否遵守“先否后是、组内串行”的规则
 - [ ] 需要审批的库是否统一写入 `审批结果`
