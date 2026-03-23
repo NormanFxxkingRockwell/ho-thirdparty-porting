@@ -229,6 +229,8 @@ def build_row_state(row: dict[str, Any], task_date: str) -> dict[str, Any]:
         "lib_name": lib_name,
         "version": row["version"],
         "task_date": task_date,
+        "task_row": row.get("_sheet_row", 0),
+        "task_file": row.get("_task_file", ""),
         "approval_required": approval_required,
         "approval_result": approval_result,
         "adaptation_status": adaptation_status,
@@ -311,13 +313,14 @@ def collect_status() -> dict[str, Any]:
         elif state == "异常":
             summary["anomaly"] += 1
 
-    def sort_key(item: dict[str, Any]) -> tuple[int, str, str]:
-        completed = 1 if item["derived_status"] == "已完成" else 0
-        return (completed, item.get("task_date", ""), item["lib_name"].lower())
-
-    current_items.sort(key=sort_key, reverse=False)
-    current_items.sort(key=lambda x: x.get("task_date", ""), reverse=True)
-    current_items.sort(key=lambda x: 1 if x["derived_status"] == "已完成" else 0)
+    current_items.sort(
+        key=lambda x: (
+            1 if x["derived_status"] == "已完成" else 0,
+            -(int(x.get("task_date", "0000-00-00").replace("-", "")) if x.get("task_date") else 0),
+            -int(x.get("task_row", 0)),
+            x["lib_name"].lower(),
+        )
+    )
 
     batches = []
     for batch_file in sorted(REPORTS_DIR.glob("batch-????-??-??.md"), reverse=True):

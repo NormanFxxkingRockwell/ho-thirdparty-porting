@@ -1,6 +1,7 @@
 tpc_c_cplusplus
 command-line-tools
 tmp
+.vscode
 
 # User-side execution artifacts
 reports/*
