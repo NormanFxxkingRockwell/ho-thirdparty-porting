@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ho-thirdparty-porting Dashboard</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>三方库鸿蒙化看板</h1>
+        <p id="meta">正在加载…</p>
+      </div>
+      <div class="toolbar">
+        <button id="refreshBtn" type="button">立即刷新</button>
+        <label class="toggle">
+          <input id="autoRefresh" type="checkbox" checked />
+          <span>自动刷新（5 秒）</span>
+        </label>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="summary" id="summaryCards"></section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>当前库状态</h2>
+          <div class="filters">
+            <input id="searchInput" type="search" placeholder="搜索库名…" />
+            <select id="statusFilter">
+              <option value="">全部状态</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>库名</th>
+                <th>综合状态</th>
+                <th>审批</th>
+                <th>适配</th>
+                <th>编译</th>
+                <th>测试</th>
+                <th>.so</th>
+                <th>binary</th>
+                <th>报告</th>
+                <th>备注 / 异常</th>
+              </tr>
+            </thead>
+            <tbody id="latestTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>历史批次</h2>
+        </div>
+        <div id="historyList" class="history-list"></div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+  </html>
