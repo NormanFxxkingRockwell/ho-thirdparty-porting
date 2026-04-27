@@ -13,6 +13,7 @@ APPROVAL_RESULT=""
 ADAPTATION_STATUS=""
 BUILD_STATUS=""
 TEST_STATUS=""
+HAP_TEST_STATUS=""
 NOTE=""
 
 usage() {
@@ -25,6 +26,7 @@ Options:
   --adaptation-status <v>    One of: 待处理/pass/fail/skip
   --build-status <v>         One of: 待处理/pass/fail/skip
   --test-status <v>          One of: 待处理/pass/fail/skip
+  --hap-test-status <v>      One of: 待处理/pass/fail/skip
   --note <text>              Failure reason or remarks
 EOF
 }
@@ -67,6 +69,10 @@ while [[ $# -gt 0 ]]; do
       TEST_STATUS="$2"
       shift 2
       ;;
+    --hap-test-status)
+      HAP_TEST_STATUS="$2"
+      shift 2
+      ;;
     --note)
       NOTE="$2"
       shift 2
@@ -90,7 +96,7 @@ fi
 
 [[ -f "$TASK_FILE" ]] || fail "task sheet not found: $TASK_FILE"
 
-python3 - "$TASK_FILE" "$REPORTS_DIR" "$LIB_NAME" "$APPROVAL_RESULT" "$ADAPTATION_STATUS" "$BUILD_STATUS" "$TEST_STATUS" "$NOTE" <<'PY'
+python3 - "$TASK_FILE" "$REPORTS_DIR" "$LIB_NAME" "$APPROVAL_RESULT" "$ADAPTATION_STATUS" "$BUILD_STATUS" "$TEST_STATUS" "$HAP_TEST_STATUS" "$NOTE" <<'PY'
 from pathlib import Path
 import sys
 import re
@@ -103,13 +109,14 @@ approval_result = sys.argv[4]
 adaptation_status = sys.argv[5]
 build_status = sys.argv[6]
 test_status = sys.argv[7]
-note = sys.argv[8]
+hap_test_status = sys.argv[8]
+note = sys.argv[9]
 
 allowed_approval = {"", "待审批", "通过", "不通过", "不需要审批"}
 allowed_state = {"", "待处理", "pass", "fail", "skip"}
 if approval_result not in allowed_approval:
     raise SystemExit(f"ERROR: unsupported approval result: {approval_result}")
-for field_name, value in [("adaptation", adaptation_status), ("build", build_status), ("test", test_status)]:
+for field_name, value in [("adaptation", adaptation_status), ("build", build_status), ("test", test_status), ("hap test", hap_test_status)]:
     if value not in allowed_state:
         raise SystemExit(f"ERROR: unsupported {field_name} status: {value}")
 
@@ -130,6 +137,11 @@ for header in required_headers:
     if header not in index:
         raise SystemExit(f"ERROR: missing header in task sheet: {header}")
 
+if "HAP测试状态" not in index:
+    ws.cell(1, ws.max_column + 1).value = "HAP测试状态（待处理/pass/fail/skip）"
+    headers = [norm_header(str(ws.cell(1, c).value or "")) for c in range(1, ws.max_column + 1)]
+    index = {header: i + 1 for i, header in enumerate(headers)}
+
 target_row = None
 for row in range(2, ws.max_row + 1):
     if str(ws.cell(row, index["库名"]).value or "").strip() == lib_name:
@@ -147,6 +159,8 @@ if build_status:
     ws.cell(target_row, index["编译状态"]).value = build_status
 if test_status:
     ws.cell(target_row, index["测试状态"]).value = test_status
+if hap_test_status:
+    ws.cell(target_row, index["HAP测试状态"]).value = hap_test_status
 if note:
     ws.cell(target_row, index["失败原因/备注"]).value = note
 
@@ -170,18 +184,20 @@ for row in range(2, ws.max_row + 1):
         "adaptation_status": str(ws.cell(row, index["适配状态"]).value or "").strip() or "待处理",
         "build_status": str(ws.cell(row, index["编译状态"]).value or "").strip() or "待处理",
         "test_status": str(ws.cell(row, index["测试状态"]).value or "").strip() or "待处理",
+        "hap_test_status": str(ws.cell(row, index["HAP测试状态"]).value or "").strip() or "待处理",
         "note": str(ws.cell(row, index["失败原因/备注"]).value or "").strip(),
     })
 
 all_libs = "、".join(f"`{row['lib']}`" for row in rows)
 table_lines = [
-    "| 库名 | 是否需要用户审批方案 | 审批结果 | 适配状态 | 编译状态 | 测试状态 | 失败原因/备注 |",
-    "|------|----------------------|----------|----------|----------|----------|----------------|",
+    "| 库名 | 是否需要用户审批方案 | 审批结果 | 适配状态 | 编译状态 | 测试状态 | HAP测试状态 | 失败原因/备注 |",
+    "|------|----------------------|----------|----------|----------|----------|---------------|----------------|",
 ]
 for row in rows:
     table_lines.append(
         f"| {row['lib']} | {row['approval_required']} | {row['approval_result']} | "
-        f"{row['adaptation_status']} | {row['build_status']} | {row['test_status']} | {row['note']} |"
+        f"{row['adaptation_status']} | {row['build_status']} | {row['test_status']} | "
+        f"{row['hap_test_status']} | {row['note']} |"
     )
 
 content = f"""# 批次汇总报告（{date_match.group(1)}）

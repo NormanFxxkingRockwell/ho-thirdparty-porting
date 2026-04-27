@@ -34,6 +34,8 @@ HEADER_ALIASES = {
     "适配状态": "adaptation_status",
     "编译状态": "build_status",
     "测试状态": "test_status",
+    "hap测试状态": "hap_test_status",
+    "hap测试": "hap_test_status",
     "失败原因/备注": "note",
 }
 
@@ -93,6 +95,7 @@ def parse_task_sheet(task_file: Path) -> list[dict[str, Any]]:
         "adaptation_status": "待处理",
         "build_status": "待处理",
         "test_status": "待处理",
+        "hap_test_status": "待处理",
         "note": "",
     }
 
@@ -136,31 +139,32 @@ def parse_batch_report(path: Path) -> BatchSummary:
         libs = [part.strip("` ") for part in libs_match.group(1).split("、") if part.strip()]
 
     rows: list[dict[str, str]] = []
-    table_match = re.search(
-        r"\| 库名 \| 是否需要用户审批方案 \| 审批结果 \| 适配状态 \| 编译状态 \| 测试状态 \| 失败原因/备注 \|\n"
-        r"\|[-| ]+\|\n"
-        r"(?P<body>(?:\|.*\|\n?)*)",
-        text,
-    )
-    if table_match:
-        body = table_match.group("body")
-        for line in body.splitlines():
-            if not line.startswith("|"):
+    lines = text.splitlines()
+    for idx, line in enumerate(lines):
+        if not line.startswith("| 库名 |"):
+            continue
+        headers = [normalize_header(part) for part in line.strip().strip("|").split("|")]
+        mapped_headers = [HEADER_ALIASES.get(header, header) for header in headers]
+        for body_line in lines[idx + 2 :]:
+            if not body_line.startswith("|"):
                 break
-            parts = [part.strip() for part in line.strip().strip("|").split("|")]
-            if len(parts) != 7 or parts[0] == "库名":
+            parts = [part.strip() for part in body_line.strip().strip("|").split("|")]
+            if len(parts) != len(mapped_headers) or parts[0] == "库名":
                 continue
+            row = {key: parts[pos] for pos, key in enumerate(mapped_headers) if key}
             rows.append(
                 {
-                    "lib_name": parts[0],
-                    "approval_required": parts[1],
-                    "approval_result": parts[2],
-                    "adaptation_status": parts[3],
-                    "build_status": parts[4],
-                    "test_status": parts[5],
-                    "note": parts[6],
+                    "lib_name": row.get("lib_name", ""),
+                    "approval_required": row.get("approval_required", ""),
+                    "approval_result": row.get("approval_result", ""),
+                    "adaptation_status": row.get("adaptation_status", ""),
+                    "build_status": row.get("build_status", ""),
+                    "test_status": row.get("test_status", ""),
+                    "hap_test_status": row.get("hap_test_status", ""),
+                    "note": row.get("note", ""),
                 }
             )
+        break
 
     summary: list[str] = []
     section_match = re.search(r"## 4\. 交付总结\s+(?P<body>.*)", text, re.S)
@@ -182,6 +186,7 @@ def build_row_state(row: dict[str, Any], task_date: str) -> dict[str, Any]:
     adaptation_plan = report_dir / "adaptation-plan.md"
     adaptation_report = report_dir / "adaptation-report.md"
     build_report = report_dir / "build-report.md"
+    hap_report = report_dir / "hap-device-report.md"
     lib_dir = output_dir / "lib"
     bin_dir = output_dir / "bin"
 
@@ -199,19 +204,24 @@ def build_row_state(row: dict[str, Any], task_date: str) -> dict[str, Any]:
         anomalies.append("任务表显示适配通过，但缺少 adaptation-report.md")
     if row["build_status"] == "pass" and not build_report.exists():
         anomalies.append("任务表显示编译通过，但缺少 build-report.md")
+    if row.get("hap_test_status") == "pass" and not hap_report.exists():
+        anomalies.append("任务表显示 HAP 测试通过，但缺少 hap-device-report.md")
 
     approval_required = row["approval_required"] or "是"
     approval_result = row["approval_result"] or ("不需要审批" if approval_required == "否" else "待审批")
     adaptation_status = row["adaptation_status"] or "待处理"
     build_status = row["build_status"] or "待处理"
     test_status = row["test_status"] or "待处理"
+    hap_test_status = row.get("hap_test_status") or "待处理"
 
     if anomalies:
         derived = "异常"
     elif approval_required != "否" and approval_result == "待审批":
         derived = "方案待审批"
-    elif "fail" in {adaptation_status, build_status, test_status}:
+    elif "fail" in {adaptation_status, build_status, test_status, hap_test_status}:
         derived = "失败"
+    elif adaptation_status == "pass" and build_status == "pass" and test_status == "pass" and hap_test_status == "pass":
+        derived = "HAP通过"
     elif adaptation_status == "pass" and build_status == "pass" and test_status == "pass":
         derived = "已完成"
     elif build_status == "pass" and test_status in {"待处理", "skip", ""}:
@@ -236,6 +246,7 @@ def build_row_state(row: dict[str, Any], task_date: str) -> dict[str, Any]:
         "adaptation_status": adaptation_status,
         "build_status": build_status,
         "test_status": test_status,
+        "hap_test_status": hap_test_status,
         "note": row["note"],
         "derived_status": derived,
         "anomalies": anomalies,
@@ -246,11 +257,13 @@ def build_row_state(row: dict[str, Any], task_date: str) -> dict[str, Any]:
             "adaptation_plan": rel(adaptation_plan) if adaptation_plan.exists() else "",
             "adaptation_report": rel(adaptation_report) if adaptation_report.exists() else "",
             "build_report": rel(build_report) if build_report.exists() else "",
+            "hap_report": rel(hap_report) if hap_report.exists() else "",
         },
         "artifacts": {
             "has_source_dir": source_dir.exists(),
             "has_report_dir": report_dir.exists(),
             "has_build_report": build_report.exists(),
+            "has_hap_report": hap_report.exists(),
             "has_output_dir": output_dir.exists(),
             "has_so": has_so,
             "has_binary": has_binary,
@@ -288,6 +301,7 @@ def collect_status() -> dict[str, Any]:
     summary = {
         "total": len(current_items),
         "done": 0,
+        "hap_done": 0,
         "pending_approval": 0,
         "adapting": 0,
         "adapted": 0,
@@ -298,7 +312,10 @@ def collect_status() -> dict[str, Any]:
 
     for item in current_items:
         state = item["derived_status"]
-        if state == "已完成":
+        if state == "HAP通过":
+            summary["hap_done"] += 1
+            summary["done"] += 1
+        elif state == "已完成":
             summary["done"] += 1
         elif state == "方案待审批":
             summary["pending_approval"] += 1

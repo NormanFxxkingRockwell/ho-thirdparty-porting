@@ -140,6 +140,8 @@ header_alias = {
     "适配状态": "adaptation_status",
     "编译状态": "build_status",
     "测试状态": "test_status",
+    "hap测试状态": "hap_test_status",
+    "hap测试": "hap_test_status",
     "失败原因/备注": "note",
     "备注": "note",
     "lib_name": "lib_name",
@@ -150,6 +152,7 @@ header_alias = {
     "adaptation_status": "adaptation_status",
     "build_status": "build_status",
     "test_status": "test_status",
+    "hap_test_status": "hap_test_status",
     "note": "note",
 }
 
@@ -178,6 +181,7 @@ defaults = {
     "adaptation_status": "待处理",
     "build_status": "待处理",
     "test_status": "待处理",
+    "hap_test_status": "待处理",
     "note": "",
 }
 
@@ -223,6 +227,7 @@ else:
             item["adaptation_status"],
             item["build_status"],
             item["test_status"],
+            item["hap_test_status"],
             item["note"],
         ]))
 PY
