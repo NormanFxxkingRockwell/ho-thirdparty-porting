@@ -2,6 +2,8 @@ tpc_c_cplusplus
 command-line-tools
 tmp
 .vscode
+.hvigor
+signTools/hapsigner/
 
 # User-side execution artifacts
 reports/*
