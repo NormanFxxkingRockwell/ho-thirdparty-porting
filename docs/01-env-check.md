@@ -7,6 +7,7 @@
 - 自动发现 HarmonyOS SDK 和 `lycium`
 - 区分“基础交叉编译环境”与“lycium 额外前置”
 - 输出基础设备连接状态
+- 输出 HAP 验证模板状态
 
 ## 检查分层
 
@@ -37,6 +38,32 @@
 - `harmonyos-dev-mcp` 作为设备测试主通道，由用户负责预先配置
 - 流程仓库不承担 `mcp` 环境治理职责
 - 设备测试执行阶段默认优先走 `harmonyos-dev-mcp`，失败再 fallback 到 `hdc`
+
+### HAP 验证状态
+
+这是 `device-pass` 之上的增强验证条件，不是编译门槛。
+
+检查目标：
+- `templates/soTest-template.zip` 是否存在
+- 后续是否可在 `tmp/hap-test/<库名>/` 解压临时工程
+- DevEco Studio 是否可发现
+- `ohpm` 是否可用
+- `hvigor` / `hvigorw` 是否可用
+- `java` 是否可用
+- 模板工程是否已包含签名配置
+- `signTools/hapsigner.zip` 是否存在且包含外部签名所需文件
+- 设备是否满足 HAP 安装与启动验证的基础连接条件
+
+说明：
+- HAP 构建依赖 DevEco/Hvigor/签名等本机环境，这些环境不作为 Phase 1 的硬阻塞项。
+- 在 WSL 场景下，DevEco Studio、`ohpm`、`hvigor`、签名配置通常位于 Windows 侧，不应要求安装到 WSL。
+- Phase 1 脚本只负责从 WSL 探测 Windows 侧可见状态，例如 `/mnt/c`、`/mnt/d`、`powershell.exe Get-Command` 和显式环境变量。
+- `HAP_SIGNING_READY=true` 可以来自两条正式路径：
+  - 模板工程自带 `build-profile.json5` 签名配置
+  - 仓库内 `signTools/hapsigner.zip` 外部签名包，加上可调用的 `java`
+- `HAP_SIGNING_MODE` 用于区分当前应走 `project-config` 还是 `external-signTools`。
+- 如果 HAP 环境不可用，后续 HAP 验证可记录为 `skip`，但不影响 `.so` 编译和原有 binary 设备测试。
+- `HAP_ENV_READY=false` 只说明 Phase 5-3 可能无法自动完成，不代表 Phase 1 基础环境失败。
 
 ## 检查项
 
@@ -93,6 +120,23 @@ $OHOS_SDK/native/build/cmake/ohos.toolchain.cmake
 - `DEVICE_CONNECTED`
 - `HDC_DEVICE_TEST_READY`
 - `DEVICE_TEST_READY`
+- `HAP_TEMPLATE_READY`
+- `HAP_PROJECT_CONFIG_READY`
+- `HAP_DEVECO_READY`
+- `HAP_WINDOWS_BRIDGE_READY`
+- `HAP_OHPM_READY`
+- `HAP_OHPM_HOST`
+- `HAP_HVIGOR_READY`
+- `HAP_HVIGOR_HOST`
+- `HAP_JAVA_READY`
+- `HAP_JAVA_HOST`
+- `HAP_SIGNTOOLS_READY`
+- `HAP_PROJECT_SIGNING_READY`
+- `HAP_SIGNING_MODE`
+- `HAP_AUTOMATED_BUILD_READY`
+- `HAP_SIGNING_READY`
+- `HAP_DEVICE_READY`
+- `HAP_ENV_READY`
 
 ## 标准执行方式
 
@@ -142,10 +186,23 @@ Phase 1 完成后，建议向用户汇报：
 - `HDC_READY`
 - `DEVICE_CONNECTED`
 - `HDC_DEVICE_TEST_READY`
+- `HAP_TEMPLATE_READY`
+- `HAP_DEVECO_READY`
+- `HAP_WINDOWS_BRIDGE_READY`
+- `HAP_OHPM_READY`
+- `HAP_HVIGOR_READY`
+- `HAP_JAVA_READY`
+- `HAP_SIGNTOOLS_READY`
+- `HAP_SIGNING_MODE`
+- `HAP_SIGNING_READY`
+- `HAP_ENV_READY`
 
 并明确说明：
 - 哪些状态会阻塞后续适配和编译
 - 哪些状态只会影响后续 `device-pass`
+- 哪些状态只会影响后续 `hap-device-pass`
+- 如果 `HAP_OHPM_HOST` 或 `HAP_HVIGOR_HOST` 为 `windows`，后续 HAP 构建命令应通过 Windows/PowerShell/DevEco 路径执行，而不是在 WSL 中直接调用
+- 如果 `HAP_SIGNING_MODE=external-signTools`，后续应明确走 `signTools/hapsigner.zip` 外部签名链，而不是要求模板工程自带 signingConfigs
 - 设备测试阶段默认优先走 `harmonyos-dev-mcp`
 
 ## 通过标准
@@ -157,3 +214,5 @@ Phase 1 完成后，建议向用户汇报：
 - [ ] `ohos.toolchain.cmake` 存在
 - [ ] 默认架构使用 `arm64-v8a`
 - [ ] `tpc_c_cplusplus/lycium/build.sh` 存在
+- [ ] 已输出 `HAP_TEMPLATE_READY`
+- [ ] 已输出 `HAP_ENV_READY`

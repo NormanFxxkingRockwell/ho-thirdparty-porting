@@ -51,6 +51,7 @@ bash scripts/prepare-task-sheet.sh
 | 适配状态 | 否 | `待处理/pass/fail/skip` |
 | 编译状态 | 否 | `待处理/pass/fail/skip` |
 | 测试状态 | 否 | `待处理/pass/fail/skip` |
+| HAP测试状态 | 否 | `待处理/pass/fail/skip` |
 | 失败原因/备注 | 否 | 特殊依赖、失败原因、编译说明等 |
 
 ### 4. 提示用户填写

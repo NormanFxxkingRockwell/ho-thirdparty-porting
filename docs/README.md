@@ -16,11 +16,14 @@
 - `lycium` 不是直接消费 `libs/<库名>/` 源码目录的工具，它以 `HPKBUILD` recipe 为核心输入。
 - 设备测试主通道是 `harmonyos-dev-mcp`，`hdc` 仅作补充 fallback。
 - `harmonyos-dev-mcp` 的安装和配置由用户负责，流程仓库只负责在测试阶段优先调用它。
+- HAP 验证是 `device-pass` 之上的更高可信验证，不替代现有 binary 设备测试。
+- `signTools/hapsigner.zip` 可以作为长期保留的外部 HAP 签名资源。
 
 成功分级：
 - `build-pass`：成功生成目标 `.so`
 - `binary-pass`：成功生成测试 binary
 - `device-pass`：binary 成功推送到设备并执行
+- `hap-device-pass`：HAP 通过 ArkTS -> NAPI -> 三方库 `.so` 链路完成真实调用并展示结果
 
 ## 核心原则
 
@@ -30,7 +33,7 @@
 - `Phase 2`：读取任务并获取源码
 - `Phase 3`：输出 HarmonyOS 业务代码适配方案报告
 - `Phase 4`：实施业务代码适配方案，并生成业务适配报告
-- `Phase 5`：构建编译，允许边编译边修代码，直到产出 `.so`，并在存在现成测试入口时补出测试 binary
+- `Phase 5`：构建编译、binary 设备测试，并可选执行 HAP 高可信设备验证
 - `Phase 6`：交付、归档与测试结果汇总
 
 ### 2. STOP 点
@@ -96,6 +99,7 @@
 - 已确认基础交叉编译环境可用
 - 已区分 `base-ready` 与 `lycium-ready` 状态
 - 已输出基础设备连接状态：`HDC_READY`、`DEVICE_CONNECTED`
+- 已输出 HAP 增强验证状态：`HAP_DEVECO_READY`、`HAP_WINDOWS_BRIDGE_READY`、`HAP_OHPM_READY`、`HAP_OHPM_HOST`、`HAP_HVIGOR_READY`、`HAP_HVIGOR_HOST`、`HAP_JAVA_READY`、`HAP_JAVA_HOST`、`HAP_SIGNTOOLS_READY`、`HAP_SIGNING_MODE`、`HAP_SIGNING_READY`、`HAP_ENV_READY`
 - 已生成正式任务表
 - 已生成批次汇总报告
 
@@ -126,16 +130,18 @@
 输出：
 - `reports/<库名>/adaptation-report.md`
 
-### Phase 5：构建编译
+### Phase 5：构建编译与设备验证
 
 涉及文档：
 - [10-build-system-detect.md](./10-build-system-detect.md)
 - [11-cmake-build.md](./11-cmake-build.md)
+- [12-hap-device-test.md](./12-hap-device-test.md)
 
 输出：
 - `outputs/<库名>/lib/`
 - `outputs/<库名>/bin/`
 - `reports/<库名>/build-report.md`
+- `reports/<库名>/hap-device-report.md`（如果执行 HAP 验证）
 - 必要时生成 `libs/<库名>/build.sh`
 
 策略：
@@ -147,17 +153,28 @@
 - 编译期间允许根据报错继续修改代码
 - 优先复用上游自带、可独立运行的测试入口；若没有合适的测试入口，再使用上游 CLI 做真实能力校验（CLI 能力校验）；若仍无现成测试入口，则明确记录“无测试用例”
 - 设备测试时默认优先调用 `harmonyos-dev-mcp`，失败再 fallback 到 `hdc`
+- 如果本轮要求更高可信验证，HAP 验证在 `device-pass` 之后执行，使用模板工程把 `.so` 放入应用，通过 ArkTS -> NAPI -> native 调用链验证
+- HAP 验证路径必须按库选择：有小型静态资源、fixture、expected 输出或 roundtrip 语义时，优先做 `fixture-driven HAP`；能低成本包进 NAPI 的上游测试/示例逻辑其次复用；只有没有可用资源/expected/roundtrip 或资源无法稳定打包时，才降级为“最小但真实”的 API smoke path
+- 资源目录不是降级 smoke 的理由；应优先使用 `rawfile`、`resfile` 或 sandbox copy 把资源交给 NAPI/native，并在日志或 UI 中输出用例数、通过数、失败数和资源来源
+- HAP 准备阶段不能只看顶层 `.so`；如果存在 `*.so.*` 版本化 SONAME 文件或额外非系统运行时依赖，必须一并打包并核对 `NEEDED`
+- 如果 `HAP_SIGNING_MODE=external-signTools`，允许使用 `signTools/hapsigner.zip` 对 unsigned HAP 做外部签名；这条路径不要求修改模板工程的签名源码或工具链源码
+- 外部签名优先使用 `scripts/sign-hap-with-sign-tools.sh`；遇到 `signAlg` 缺失、参数不成对等错误时，应先按命令参数解析问题排查，不得直接归类为 Java 环境问题
+- 如果 profile 模板未变且已有 `ohos_provision_debug.p7b`，可以先尝试直接 `sign-app`，不要因为 `sign-profile` 参数拼装失败就立即跳过 HAP 验证
+- HAP 验证失败或跳过不反向否定已完成的 `build-pass` / `binary-pass` / `device-pass`，但必须记录 `hap-device-pass`
+- `HAP_ENV_READY=false` 时，HAP 验证不得伪造通过，应记录 `skip` 或 `fail` 并说明缺失项
+- WSL 场景下不要求 DevEco/ohpm/hvigor/签名安装到 WSL；如果检测到 `HAP_*_HOST=windows`，后续命令应走 Windows/PowerShell/DevEco
+- 如果在 WSL 中调用 Windows `hdc.exe`，`file send` 应使用 Windows / UNC 本地路径和显式远端文件名，不要依赖相对路径发送
 
 ### Phase 6：交付与归档
 
 涉及文档：
-- [12-delivery-archive.md](./12-delivery-archive.md)
+- [13-delivery-archive.md](./13-delivery-archive.md)
 
 说明：
-- 汇总 `.so`、binary、报告、测试命令与设备执行结果
+- 汇总 `.so`、binary、报告、测试命令、设备执行结果与 HAP 验证结果
 - 更新任务表状态和报告路径
 - 更新 `reports/batch-YYYY-MM-DD.md`
-- 明确汇总本轮是 `build-pass`、`binary-pass` 还是 `device-pass`
+- 明确汇总本轮是 `build-pass`、`binary-pass`、`device-pass` 还是 `hap-device-pass`
 
 ## 默认路径约定
 
@@ -170,6 +187,10 @@
 - 库报告目录：`reports/<库名>/`
 - 批次汇总报告：`reports/batch-YYYY-MM-DD.md`
 - 设备推送目录：`/data/local/tmp/<库名>/`
+- HAP 模板压缩包：`templates/soTest-template.zip`
+- HAP 外部签名包：`signTools/hapsigner.zip`
+- HAP 临时工程目录：`tmp/hap-test/<库名>/soTest/`
+- HAP 验证资料目录：`reports/<库名>/hap-device/`
 
 ## 推荐脚本
 
@@ -182,6 +203,9 @@
 - `scripts/update-batch-status.sh`
 - `scripts/run-lycium-build.sh`
 - `scripts/init-build-script.sh`
+- `scripts/prepare-hap-test-project.sh`
+- `scripts/sign-hap-with-sign-tools.sh`
+- `scripts/collect-hap-test-artifacts.sh`
 
 ## AI 执行检查清单
 
@@ -192,6 +216,15 @@
 - [ ] Phase 5 是否遵循“上游自带、可独立运行的测试入口优先，其次 `CLI` 能力校验，最后才是 `无测试用例`”的顺序
 - [ ] 若无现成测试入口，是否已在 build report 中明确记录“无测试用例”
 - [ ] 设备测试阶段是否默认优先调用 `harmonyos-dev-mcp`
+- [ ] 若执行 HAP 验证，是否先从模板重新解压临时工程，而不是复用上轮工程
+- [ ] 若执行 HAP 验证，是否先检查 `HAP_ENV_READY` 及其缺失项
+- [ ] 若执行 HAP 验证，是否根据 `HAP_SIGNING_MODE` 选择模板内签名或 `signTools/hapsigner.zip` 外部签名
+- [ ] 若外部签名失败，是否优先使用 `scripts/sign-hap-with-sign-tools.sh` 复现，并区分参数解析失败、profile 不匹配和真实环境缺失
+- [ ] 若执行 HAP 验证，是否先盘点静态资源、fixture、expected 输出、roundtrip 语义和目标 API 输入形态
+- [ ] 若执行 HAP 验证，是否根据当前库特征在 `fixture-driven HAP`、`复用上游测试/示例逻辑` 和 `最小真实 API smoke path` 之间做了明确选择，并说明理由
+- [ ] 若存在可用 fixture/resource/roundtrip，是否优先使用 `rawfile`、`resfile` 或 sandbox copy 承载，而不是直接降级 smoke
+- [ ] 若执行 HAP 验证，是否检查了 `*.so.*` 版本化 SONAME 文件和额外非系统运行时依赖，而不是只拷贝顶层 `.so`
+- [ ] HAP 验证是否真实调用目标三方库 `.so`，而不是只跑模板默认 NAPI 示例
 - [ ] 多库时是否遵守“先否后是、组内串行”的规则
 - [ ] 需要审批的库是否统一写入 `审批结果`
 - [ ] 遇到 STOP 后是否真正停止并等待用户继续

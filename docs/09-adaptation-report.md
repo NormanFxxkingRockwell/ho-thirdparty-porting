@@ -7,6 +7,7 @@
 - 记录 Phase 4 实际实施的业务适配修改
 - 标记与方案不一致的地方
 - 把测试入口、关键 API 和样例输入交接给 Phase 5
+- 把可用于 HAP 验证的真实 API、资源、fixture 和 expected 校验方式交接给 Phase 5-3
 
 ## 建议结构
 
@@ -37,6 +38,9 @@
 - 若没有合适测试入口，明确记录“无测试用例”
 - 关键 API、参数、样例输入
 - 推荐执行命令
+- 可用于 HAP 验证的真实 API 调用路径，例如解析/编码/转换、压缩/解压回环、文件读写、图片/字体/XML/INI/JSON fixture 校验等真实能力路径
+- 若存在静态资源、fixture、expected 输出或 device-pass 使用的输入文件，必须交接资源源路径、推荐 HAP 承载方式和 expected 校验方式
+- 若建议降级为最小 API smoke，必须说明为什么资源级或 roundtrip 验证不适用
 
 ### 3. Phase 5 直接复用本报告
 
@@ -46,3 +50,5 @@ Phase 5 不应重新猜测试入口。
 - 候选 CLI 能力校验入口
 - 推荐命令
 - “无测试用例”的明确结论
+- 可接入 ArkTS -> NAPI -> native 的真实 API 调用建议
+- 可打入 HAP 的资源、fixture、expected 输出和承载策略

@@ -47,6 +47,7 @@ lycium 优先
 -> 若无现成测试入口则记录“无测试用例”
 -> mcp 设备测试
 -> 失败则 hdc fallback
+-> 若需要更高可信验证，进入 HAP 设备验证
 ```
 
 ## lycium 执行前的固定检查
@@ -156,6 +157,13 @@ binary 收集优先级固定如下：
 - 记录实际使用的是 `harmonyos-dev-mcp` 还是 `hdc fallback`
 - 记录设备侧执行结果
 
+说明：
+- 本阶段完成的是 binary 设备侧验证，即 `device-pass`。
+- HAP 验证不在本文件内展开，完成本阶段后按需进入 [12-hap-device-test.md](./12-hap-device-test.md)。
+- 如果 binary 依赖 `.so`，推送到设备时也必须一并处理所需的 `.so` / `.so.*` 文件与运行时目录。
+- 如果在 WSL 内调用的是 Windows `hdc.exe`，不要把 Linux 相对路径直接传给 `hdc.exe file send`；优先用 `wslpath -w` 转成本地 Windows / UNC 路径，并把远端目标写到明确文件名。
+- `file send` 之后应先用 `hdc shell ls -al /data/local/tmp/<库名>/` 校验远端布局，再执行 `chmod` / 启动。
+
 设备侧结果记录规则：
 - 优先记录明确的数字返回码
 - 如果执行环境只能给出布尔结果或成功/失败标记，也允许记录
@@ -165,7 +173,16 @@ binary 收集优先级固定如下：
 典型 `hdc` fallback 动作：
 
 ```bash
-hdc file send outputs/<库名>/bin/<binary> /data/local/tmp/<库名>/
+hdc shell rm -rf /data/local/tmp/<库名>
+hdc shell mkdir -p /data/local/tmp/<库名>
+
+# Linux/WSL 原生 hdc
+hdc file send outputs/<库名>/bin/<binary> /data/local/tmp/<库名>/<binary>
+
+# 如果实际使用的是 Windows hdc.exe from WSL
+hdc.exe file send "$(wslpath -w outputs/<库名>/bin/<binary>)" /data/local/tmp/<库名>/<binary>
+
+hdc shell ls -al /data/local/tmp/<库名>
 hdc shell chmod +x /data/local/tmp/<库名>/<binary>
 hdc shell /data/local/tmp/<库名>/<binary> [args...]
 ```
@@ -176,6 +193,7 @@ hdc shell /data/local/tmp/<库名>/<binary> [args...]
 - `build-pass`
 - `binary-pass`
 - `device-pass`
+- 是否需要继续执行 `hap-device-pass`
 - binary 来源类型是“上游自带、可独立运行的测试入口” / `CLI`，或明确记录“无测试用例”
 - binary 是来自 install 目录还是构建目录
 - 设备测试通道是 `harmonyos-dev-mcp` 还是 `hdc fallback`
@@ -193,6 +211,7 @@ hdc shell /data/local/tmp/<库名>/<binary> [args...]
 - [ ] build report 中已明确 binary 收集来源
 - [ ] 若无现成测试入口，build report 中已明确记录“无测试用例”
 - [ ] build report 中已明确设备测试通道
+- [ ] build report 中已说明是否继续执行 HAP 高可信设备验证
 - [ ] 结论以 `arm64-v8a` 产物为准，其他架构仅作附带结果
 - [ ] 未发现新的 `.rej` 文件
 - [ ] 关键日志未出现未处理失败信号

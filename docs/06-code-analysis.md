@@ -39,7 +39,11 @@
 - 这些测试入口可能位于 `test/`、`tests/`、`testing/`、`example/`、`examples/`、`sample/`、`samples/`、`tools/`、`programs/` 或其他自定义目录
 - 若无合适测试入口，上游可复用的 CLI
 - 推荐优先使用的运行命令
-- 样例输入、参数或测试数据
+- 样例输入、参数、测试数据、fixture 目录和 expected 输出
+- Phase 5-2 设备测试是否依赖静态文件、标准输入、工作目录、输出文件或 roundtrip 结果
+- 可用于 HAP 验证的真实 API 调用路径
+- HAP 静态资源承载建议：`rawfile` / `resfile` / `sandbox copy` / `hdc pushed fixture` / `none`
+- 如果只能做最小 API smoke，说明为什么没有可用 fixture、资源或 roundtrip 语义
 - 若无现成入口，明确记录“无测试用例”
 
 ### 5. 给 Phase 5 的最小交接摘要
