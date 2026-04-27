@@ -20,6 +20,7 @@ function escapeHtml(value) {
 
 function statusClass(value) {
   switch (value) {
+    case "HAP通过":
     case "已完成":
       return "status status-done";
     case "适配中":
@@ -42,6 +43,7 @@ function renderSummary(summary) {
   const items = [
     ["总库数", summary.total],
     ["已完成", summary.done],
+    ["HAP通过", summary.hap_done],
     ["待审批", summary.pending_approval],
     ["适配中", summary.adapting + summary.adapted],
     ["已编译未测试", summary.built_not_tested],
@@ -69,6 +71,9 @@ function buildPathLinks(item) {
   }
   if (item.paths.build_report) {
     links.push(`<a href="/browse?path=${encodeURIComponent(item.paths.build_report)}">build-report</a>`);
+  }
+  if (item.paths.hap_report) {
+    links.push(`<a href="/browse?path=${encodeURIComponent(item.paths.hap_report)}">hap-report</a>`);
   }
   return `<div class="path-links small">${links.join(" | ")}</div>`;
 }
@@ -106,6 +111,7 @@ function renderLatestTable(items) {
           <td>${escapeHtml(item.adaptation_status || "待处理")}</td>
           <td>${escapeHtml(item.build_status || "待处理")}</td>
           <td>${escapeHtml(item.test_status || "待处理")}</td>
+          <td>${escapeHtml(item.hap_test_status || "待处理")}</td>
           <td>${item.artifacts.has_so ? "是" : "否"}</td>
           <td>${item.artifacts.has_binary ? "是" : "否"}</td>
           <td>${buildPathLinks(item)}</td>
@@ -124,7 +130,7 @@ function renderHistory(history) {
           (row) =>
             `<li>${escapeHtml(row.lib_name)}：${escapeHtml(row.adaptation_status)}/${escapeHtml(
               row.build_status
-            )}/${escapeHtml(row.test_status)}${row.note ? `，${escapeHtml(row.note)}` : ""}</li>`
+            )}/${escapeHtml(row.test_status)}/${escapeHtml(row.hap_test_status || "待处理")}${row.note ? `，${escapeHtml(row.note)}` : ""}</li>`
         )
         .join("");
       const summary = batch.summary
